@@ -17,7 +17,8 @@ must('id="remoteConnectionBanner"','connection recovery banner');
 must('id="remoteReconnectButton"','manual re-pair action');
 must('connectionUnstableTitle','temporary disconnect explanation');
 must('connectionLostTitle','permanent disconnect explanation');
-mustMatch(/onAppDisconnected\(role,temporary=false\)[\s\S]*?remote\.lost=state\.remote\.everConnected/,'permanent phone disconnect becomes explicit lost state');
+mustMatch(/markTransportLongDisconnected\(role\)[\s\S]*?remote\.lost=state\.remote\.everConnected/,'long transient disconnect becomes explicit lost state');
+mustMatch(/onAppDisconnected\(role,temporary=false\)[\s\S]*?state\.channels\.control=null/,'actual failed/closed transport clears channel references');
 mustMatch(/markTransportRecovered\(role\)[\s\S]*?remote\.lost=false[\s\S]*?remote\.connected=true/,'recovery clears lost state');
 mustMatch(/restartRemotePairing\(\)[\s\S]*?openPair\('join'\)/,'Reconnect action returns to QR pairing');
 

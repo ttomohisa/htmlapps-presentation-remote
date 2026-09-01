@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.2 - 2026-09-01
+
+- Restore the intended WebRTC channel isolation: Presenter View preview traffic now uses the dedicated ordered `presentation-preview` DataChannel instead of preferring `presentation-control`.
+- Keep the control DataChannel reserved for navigation commands, state synchronization, acknowledgements and heartbeat ping/pong traffic.
+- Preserve PeerConnection/DataChannel references across prolonged transient `disconnected` states so WebRTC can recover without forcing a new QR pairing.
+- Tear down application channel references only when the underlying peer actually reaches `failed` or `closed`.
+- Preserve the last meaningful candidate-pair statistics when Chromium drops failed-pair reports, avoiding the misleading “no compatible candidate pair” diagnosis after a route had already connected.
+- Add a specific diagnostic for “connected once, then connectivity-check replies stopped,” matching the observed connected → disconnected → failed transition.
+
 ## 1.0.1 - 2026-09-01
 
 - Expand direct-WebRTC diagnostics with candidate-pair attempt counts and connectivity-check send/receive counters from `RTCPeerConnection.getStats()`.

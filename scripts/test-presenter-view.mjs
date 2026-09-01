@@ -72,10 +72,11 @@ mustMatch(/state\.deck\?\.engine==='hifi'[\s\S]*?renderHiFiPresenterPreview\(ind
 
 
 mustMatch(/if\(!sendPreviewJson\(\{type:'preview-chunk'[\s\S]*?\)\)throw new Error\('PREVIEW_CHUNK_SEND_FAILED'\)/, 'chunk send failure is not silently ignored');
-mustMatch(/respondPresenterRequest\(msg,responseChannel=null\)[\s\S]*?sendPreviewImage\(index,requestId,revision,token,channel\)/, 'control fallback replies on the request channel');
+mustMatch(/respondPresenterRequest\(msg,responseChannel=null\)[\s\S]*?sendPreviewImage\(index,requestId,revision,token,channel\)/, 'preview replies stay on the request channel');
 
 must('function previewTransportChannel()', 'preview transport selection');
-mustMatch(/const control=state\.channels\.control[\s\S]*?const dedicated=state\.channels\.preview/, 'control channel is the primary preview transport');
+mustMatch(/function previewTransportChannel\(\)\{const dedicated=state\.channels\.preview;if\(dedicated\?\.readyState==='open'\)return dedicated;return null\}/, 'dedicated preview channel is the normal preview transport');
+if (/function previewTransportChannel\(\)\{[^}]*state\.channels\.control/.test(html)) throw new Error('Presenter View bulk transfer must not prefer the control channel');
 mustMatch(/startsWith\(['"]preview-['"]\)[\s\S]*?handlePreviewMessage/, 'preview messages tunneled over control channel');
 must('previewErrors:new Map()', 'persistent remote preview error state');
 mustMatch(/function previewPlaceholderText[\s\S]*?previewErrors\.has\(index\)[\s\S]*?previewUnavailable/, 'current preview failure remains visible');
@@ -97,14 +98,14 @@ mustMatch(/loadPptxFallback\(buffer,file,generation,\{withCompatibility:false\}\
 mustMatch(/previewTimeout\(rawPromise,12000,'PREVIEW_RENDERER_TIMEOUT'\)/, 'preview renderer initialization has a finite timeout');
 must("type:'preview-status'", 'host progress status');
 must("previewStatus:new Map()", 'remote preview progress state');
-mustMatch(/sendPreviewJson\(\{type:'preview-request'[\s\S]*?,ch\)/, 'preview request explicitly uses selected control-first transport');
+mustMatch(/sendPreviewJson\(\{type:'preview-request'[\s\S]*?,ch\)/, 'preview request explicitly uses the dedicated selected transport');
 
 must('pptxPreviewDeckPromise:null', 'shared PPTX preview initialization promise');
 must('hostInflight:new Map()', 'shared in-flight slide preview generation');
 mustMatch(/const token=state\.preview\.hostToken,indexes=/, 'preview retry does not invalidate in-flight generation');
 if (/respondPresenterRequest\([\s\S]*?\+\+state\.preview\.hostToken/.test(html)) throw new Error('Presenter preview requests must not cancel in-flight preview generation');
 mustMatch(/channel\.label===PREVIEW_CHANNEL&&channel\.readyState===['"]open['"]&&role===['"]join['"][\s\S]*?scheduleRemotePreviewRequest\(true\)/, 'already-open preview channel triggers request');
-must('id="versionBadge">v1.0.1', 'visible v1.0.1 badge');
+must('id="versionBadge">v1.0.2', 'visible v1.0.2 badge');
 must('@media(max-height:560px) and (orientation:landscape) and (max-width:1000px)', 'short landscape layout');
 must('.remote-mode .remote-tools{left:auto;right:7px;', 'landscape side action rail');
 
@@ -115,4 +116,4 @@ for (const stale of [
   if (html.includes(stale)) throw new Error(`Stale privacy claim remains: ${stale}`);
 }
 
-console.log('Presenter View v1.0.1 protocol / timeout / fidelity / fallback / DOM / privacy regression checks passed.');
+console.log('Presenter View v1.0.2 protocol / timeout / fidelity / channel isolation / DOM / privacy regression checks passed.');

@@ -12,7 +12,7 @@ The application is local-first and account-free. The selected deck stays on the 
 
 ## 2. Release target
 
-- Version: `1.0.1`
+- Version: `1.0.2`
 - One-file readable build: `dist/index.html`
 - One-file self-extracting build: `dist/index.self-extract.html`
 - Japanese and English in the same HTML.
@@ -188,7 +188,7 @@ Reuse `components/webrtc-qr-pairing.html` and its dependency configuration.
 - Three DataChannels:
   - `presentation-control`: `{ ordered: true }` for reliable state, commands and heartbeat messages
   - `presentation-pointer`: `{ ordered: false, maxRetransmits: 0 }` for latency-sensitive pointer movement
-  - `presentation-preview`: `{ ordered: true }` retained as a dedicated preview-capable channel; Presenter View does not require it to be open
+  - `presentation-preview`: `{ ordered: true }` for Presenter View requests, speaker notes, status and preview image chunks
 - Preview transfer must not share the ordered control queue, so navigation commands are never delayed behind image chunks.
 - Preserve the canonical component's full ICE gathering guard, delayed Answer generation, retry cleanup, diagnostics, camera fallback and manual code fallback.
 
@@ -238,7 +238,7 @@ The lossy `presentation-pointer` channel carries relative touch movement or the 
 
 Pointer messages are deliberately lossy. If the pointer channel buffer is backed up, stale motion packets may be dropped rather than increasing latency.
 
-Presenter View uses the already-open reliable `presentation-control` DataChannel as its primary request/response path. The ordered `presentation-preview` channel is retained for compatibility/future optimization but is not required for Presenter View. The remote requests at most the current and next slide that are missing from its cache:
+Presenter View uses the ordered `presentation-preview` DataChannel for its request/response path. The reliable `presentation-control` DataChannel is intentionally kept free for commands, state synchronization and heartbeat traffic. The remote requests at most the current and next slide that are missing from its cache:
 
 ```json
 {"type":"preview-request","v":4,"requestId":"3-4-abc","revision":3,"indexes":[4,5],"notesIndex":4}
@@ -377,10 +377,19 @@ The production build embeds PDF.js packed CMaps and standard-font files from the
 - DOM snapshotting MUST preserve Canvas output and SHOULD inline local Blob-backed picture resources before rasterization so chart/image layers are not lost in the transferred preview.
 - Rasterization failure SHOULD fall back to an SVG preview when a valid PPTX SVG source is available.
 - The remote MUST show progress states (requesting, generating, receiving, slow) rather than an undifferentiated permanent loading placeholder.
-- Presenter View MUST work when only the reliable control DataChannel is open; the dedicated preview DataChannel is optional.
+- Presenter View bulk image transfer MUST use the dedicated preview DataChannel. The control DataChannel remains reserved for commands, state synchronization and heartbeat traffic.
 - A failed preview metadata/chunk send MUST be surfaced as a transfer failure; silently dropping a chunk is not allowed.
-- If the request arrives over the control-channel fallback, the host SHOULD reply on that same channel for the request so asymmetric preview-channel readiness cannot strand the transfer.
-- A dedicated preview-channel failure MUST NOT prevent Presenter View from requesting previews while the reliable control channel remains open.
+- Legacy preview messages received on the control channel may still be parsed for backward compatibility, but new bulk preview requests/chunks MUST use the dedicated preview channel.
+- A dedicated preview-channel failure MUST NOT degrade remote navigation/control. Presenter View may become temporarily unavailable while the control channel remains fully responsive.
+
+
+## WebRTC channel isolation and recovery (v1.0.2)
+
+- `presentation-control` is reserved for commands, state synchronization, hello/ping/pong and acknowledgements.
+- `presentation-preview` is the normal transport for Presenter View requests, status, notes and image chunks. Bulk preview image chunks MUST NOT be sent over the control channel.
+- The host registers created DataChannels immediately instead of waiting for the `open` callback, allowing the preview scheduler to distinguish an expected-but-still-connecting preview channel from a missing channel.
+- A transient or long `disconnected` period may change the phone UI, but MUST NOT discard the PeerConnection or live DataChannel references. Only an actual `failed` / `closed` transport tears down channel references.
+- The diagnostic UI retains the last meaningful candidate-pair counters if Chromium removes candidate-pair reports after failure. A route that previously connected must not later be misreported as “no compatible candidate pair was created.”
 
 ## WebRTC connection diagnostics (v1.0.1)
 
@@ -413,20 +422,20 @@ The phone surface is optimized for use while speaking rather than for configurat
 - Presenter View is ON by default and shows the current slide larger than the next slide. Speaker notes are collapsed by default.
 - Speaker-note text size is adjustable from 11 to 19 px, persists only in local browser storage, and long notes scroll inside the notes panel instead of growing the whole remote indefinitely. On slide change, the notes panel returns to the top.
 - Presenter View may be disabled from **More**; when disabled, preview requests stop and the navigation surface expands back to the simple remote layout.
-- Preview traffic uses the already-established reliable control DataChannel as the primary transport. The optional dedicated preview DataChannel remains available, but Presenter View MUST NOT depend on it opening successfully.
+- Preview traffic uses the dedicated reliable `presentation-preview` DataChannel. The `presentation-control` DataChannel is kept free for commands, state sync and heartbeats so preview transfer cannot delay remote control.
 - A successfully sent command receives immediate visual feedback. Optional vibration feedback uses `navigator.vibrate` only when supported and is stored only in local browser storage. Visual/haptic acknowledgement MUST NOT optimistically mutate the current slide index; the remote continues to wait for host state.
 - While the phone remote is connected, the app requests Screen Wake Lock when supported. It exposes the current sleep-prevention state, re-acquires the lock after returning to a visible tab, releases it after final disconnect, and degrades without blocking presentation when the API is unavailable or denied.
-- A transient WebRTC disconnect enters the existing 8-second recovery state, visibly pauses remote controls, and preserves the local PC presentation. If recovery succeeds, state/previews are resynchronized and controls resume. If the grace period expires, the phone shows a persistent disconnected banner with an explicit **Reconnect** action that restarts the QR pairing flow; stale preview cache is cleared.
+- A transient WebRTC disconnect enters the existing 8-second recovery state, visibly pauses remote controls, and preserves the local PC presentation. If recovery succeeds, state/previews are resynchronized and controls resume. If the grace period expires, the phone shows a persistent disconnected banner with an explicit **Reconnect** action and clears stale preview cache, but the existing PeerConnection/DataChannel references remain alive until WebRTC reports `failed` or `closed`, so a late ICE recovery can still restore the session without a new QR exchange.
 - On narrow phone screens, remote mode reduces surrounding page chrome and hides the footer. Short landscape screens receive a compact layout; dialogs and fixed controls must remain inside the viewport and may not introduce horizontal scrolling.
 
 ## WebRTC stability requirements (v0.4.1)
 
-- The application creates separate DataChannels for reliable controls, low-latency pointer updates (relative touch deltas or absolute motion positions), and Presenter View preview/note transfer. Presenter View may tunnel over the reliable control DataChannel only as a compatibility fallback when the dedicated preview channel is unavailable.
+- The application creates separate DataChannels for reliable controls, low-latency pointer updates (relative touch deltas or absolute motion positions), and Presenter View preview/note transfer. Presenter View bulk data must not tunnel over the reliable control DataChannel.
 - A UI is considered connected only after the control DataChannel is open.
 - Commands include a per-client session ID and monotonically increasing sequence number; duplicate or stale sequence numbers must not execute twice.
 - Both peers send heartbeat ping/pong messages and display measured round-trip latency when available.
 - A transient `disconnected` state enters an 8-second reconnecting grace window without interrupting the locally running presentation.
 - If the same connection recovers within the window, controls are re-enabled and the host sends the complete current presentation state.
-- After the grace window expires, the remote is considered disconnected and requires pairing again.
+- After the grace window expires, the phone shows a disconnected/reconnect UI, but the existing PeerConnection and DataChannel references are preserved until the transport actually becomes `failed` or `closed`, allowing late ICE recovery without forcing a new QR exchange.
 - Pointer packets may be dropped when the unreliable pointer DataChannel buffer is backed up; stale pointer motion must not delay control commands.
 - The smartphone requests Screen Wake Lock while connected when supported and re-acquires it after visibility restoration.
