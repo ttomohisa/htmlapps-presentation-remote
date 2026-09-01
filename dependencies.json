@@ -1,0 +1,175 @@
+{
+  "$schema": "./schemas/dependencies.schema.json",
+  "dependencies": [
+    {
+      "id": "qrcode-generator",
+      "package": "qrcode-generator",
+      "version": "1.4.4",
+      "license": "MIT",
+      "homepage": "https://github.com/kazuhikoarase/qrcode-generator",
+      "assets": [
+        {
+          "key": "qrcode",
+          "path": "qrcode.js",
+          "mime": "text/javascript",
+          "stripSourceMapComment": true,
+          "compression": "gzip"
+        }
+      ]
+    },
+    {
+      "id": "jsqr",
+      "package": "jsqr",
+      "version": "1.4.0",
+      "license": "Apache-2.0",
+      "homepage": "https://github.com/cozmo/jsQR",
+      "assets": [
+        {
+          "key": "decoder",
+          "path": "dist/jsQR.js",
+          "mime": "text/javascript",
+          "stripSourceMapComment": true,
+          "compression": "gzip"
+        }
+      ]
+    },
+    {
+      "id": "pptx-renderer",
+      "package": "@aiden0z/pptx-renderer",
+      "version": "1.2.4",
+      "license": "Apache-2.0",
+      "homepage": "https://github.com/aiden0z/pptx-renderer",
+      "assets": [
+        {
+          "key": "browser",
+          "path": "dist/aiden0z-pptx-renderer.browser.es.js",
+          "mime": "text/javascript",
+          "compression": "gzip",
+          "stripSourceMapComment": true
+        }
+      ]
+    },
+    {
+      "id": "pptx-svg",
+      "package": "pptx-svg",
+      "version": "0.6.5",
+      "license": "MIT",
+      "homepage": "https://github.com/t-ujiie-g/pptx-svg",
+      "assets": [
+        {
+          "key": "index",
+          "path": "dist/index.js",
+          "mime": "text/javascript",
+          "compression": "gzip",
+          "stripSourceMapComment": true
+        },
+        {
+          "key": "renderer",
+          "path": "dist/pptx-renderer.js",
+          "mime": "text/javascript",
+          "compression": "gzip",
+          "stripSourceMapComment": true
+        },
+        {
+          "key": "editing",
+          "path": "dist/editing-helpers.js",
+          "mime": "text/javascript",
+          "compression": "gzip",
+          "stripSourceMapComment": true
+        },
+        {
+          "key": "emf",
+          "path": "dist/emf-converter.js",
+          "mime": "text/javascript",
+          "compression": "gzip",
+          "stripSourceMapComment": true
+        },
+        {
+          "key": "fonts",
+          "path": "dist/font-fallbacks.js",
+          "mime": "text/javascript",
+          "compression": "gzip",
+          "stripSourceMapComment": true
+        },
+        {
+          "key": "utils",
+          "path": "dist/utils.js",
+          "mime": "text/javascript",
+          "compression": "gzip",
+          "stripSourceMapComment": true
+        },
+        {
+          "key": "wasm-compat",
+          "path": "dist/wasm-compat.js",
+          "mime": "text/javascript",
+          "compression": "gzip",
+          "stripSourceMapComment": true
+        },
+        {
+          "key": "wmf",
+          "path": "dist/wmf-converter.js",
+          "mime": "text/javascript",
+          "compression": "gzip",
+          "stripSourceMapComment": true
+        },
+        {
+          "key": "zip",
+          "path": "dist/zip.js",
+          "mime": "text/javascript",
+          "compression": "gzip",
+          "stripSourceMapComment": true
+        },
+        {
+          "key": "wasm",
+          "path": "dist/main.wasm",
+          "mime": "application/wasm",
+          "compression": "gzip"
+        }
+      ]
+    },
+    {
+      "id": "pdfjs-dist",
+      "package": "pdfjs-dist",
+      "version": "6.3.289",
+      "license": "Apache-2.0",
+      "homepage": "https://github.com/mozilla/pdf.js",
+      "assets": [
+        {
+          "key": "pdf",
+          "path": "build/pdf.mjs",
+          "mime": "text/javascript",
+          "stripSourceMapComment": true,
+          "compression": "gzip"
+        },
+        {
+          "key": "worker",
+          "path": "build/pdf.worker.mjs",
+          "mime": "text/javascript",
+          "stripSourceMapComment": true,
+          "compression": "gzip"
+        }
+      ],
+      "assetDirectories": [
+        {
+          "path": "cmaps",
+          "keyPrefix": "cmap",
+          "includeExtensions": [
+            ".bcmap"
+          ],
+          "mime": "application/octet-stream",
+          "compression": "auto"
+        },
+        {
+          "path": "standard_fonts",
+          "keyPrefix": "font",
+          "includeExtensions": [
+            ".pfb",
+            ".ttf"
+          ],
+          "mime": "application/octet-stream",
+          "compression": "auto"
+        }
+      ]
+    }
+  ]
+}

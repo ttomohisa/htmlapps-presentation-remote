@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+const html = fs.readFileSync(new URL('../src/index.template.html', import.meta.url), 'utf8');
+const directMediaRule = '.thumb-preview>svg,.thumb-preview>canvas{width:100%!important;height:100%!important;display:block;object-fit:contain}';
+if (!html.includes(directMediaRule)) throw new Error('direct-child thumbnail sizing rule missing');
+if (html.includes('.thumb-preview svg,.thumb-preview canvas{')) throw new Error('broad nested SVG thumbnail rule regressed');
+if (!html.includes('.pptx-dom-frame:not(.pptx-thumb-frame)>div{position:absolute!important;')) throw new Error('main PPTX root positioning rule missing');
+if (!html.includes('.pptx-dom-frame.pptx-thumb-frame>div{position:relative!important;')) throw new Error('thumbnail PPTX root must stay in normal flow');
+if (html.includes('.pptx-dom-frame>div{position:absolute!important;')) throw new Error('thumbnail root is again forced absolute');
+if (!html.includes('host?.clientWidth||132')) throw new Error('thumbnail scale does not use the actual host width');
+if (!html.includes("requestAnimationFrame(()=>fitPptxDomFrame(preview))")) throw new Error('thumbnail is not refit after insertion');
+console.log('thumbnail PPTX scaling/layout regression checks passed');
