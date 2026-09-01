@@ -13,8 +13,10 @@ const must = (cond,label)=>{ if(!cond) throw new Error(`Release v1.0.0 invariant
 
 must(app.version === '1.0.0','app.config version');
 must(html.includes('id="versionBadge">v1.0.0'),'visible version badge');
-must(readme.includes('## v1.0.0 implementation'),'English README version');
-must(readmeJa.includes('## 現在の実装（v1.0.0）'),'Japanese README version');
+must(readme.includes('## Features'),'English README feature section');
+must(readmeJa.includes('## 主な機能'),'Japanese README feature section');
+must(readme.includes('## Privacy and networking'),'English README privacy section');
+must(readmeJa.includes('## プライバシーと通信'),'Japanese README privacy section');
 must(spec.includes('- Version: `1.0.0`'),'APP_SPEC release target');
 must(changelog.includes('## 1.0.0 - 2026-09-01'),'CHANGELOG 1.0.0 entry');
 

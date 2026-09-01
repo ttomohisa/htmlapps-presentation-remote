@@ -1,192 +1,191 @@
 # Browser Kitty Presentation Remote
 
+[![GitHub Pages](https://github.com/ttomohisa/htmlapps-presentation-remote/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/ttomohisa/htmlapps-presentation-remote/actions/workflows/deploy-pages.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Single HTML](https://img.shields.io/badge/distribution-single%20HTML-0ea5e9)](https://ttomohisa.github.io/htmlapps-presentation-remote/)
+
 [English README](README.md)
 
-**手元のPPTX / PDFをアップロードせずにブラウザーで開き、スマホをWebRTCリモコンとして使うプレゼンツール**です。
+手元のPPTX / PDFをPCのブラウザーで開き、スマホをWebRTCリモコンとして使えるプレゼンツールです。資料ファイル本体をアップロードせずに利用できます。
 
-Browser Kittyの単一HTMLテンプレート v1.1.0 をベースにしています。PC側にもスマホ側にもアプリやブラウザー拡張のインストールは不要です。
+## 🚀 デモ
 
-![Browser Kitty プレゼンテーションリモート](assets/screenshot.png)
+### [GitHub PagesでPresentation Remoteを開く](https://ttomohisa.github.io/htmlapps-presentation-remote/)
 
-スマホ側は縦画面と短い横画面の両方を想定し、Presenter Viewでは資料本体をスマホへ送らず、現在・次スライドの低解像度プレビューと発表者ノートを表示します。
+GitHub Pagesから最初のHTMLを読み込んだ後、PPTX / PDFの解析とプレゼン表示は発表用PCのブラウザー内で行います。スマホとはWebRTCで直接接続し、操作情報と、Presenter Viewで使う現在 / 次スライドの低解像度プレビュー・発表者ノートだけを送信します。
 
-## 現在の実装（v1.0.0）
+[![Presentation Remoteの画面](assets/screenshot.png)](https://ttomohisa.github.io/htmlapps-presentation-remote/)
 
-- PPTX / PDF のローカル読み込み（最大150 MB）
-- `@aiden0z/pptx-renderer@1.2.4` を主経路にしたPowerPoint互換重視のPPTX表示
-  - スライド → レイアウト → マスターの背景 / テンプレート継承
-  - 7段階の文字スタイル継承と埋め込みフォント処理
-  - 187+のプリセット / カスタム図形、コネクタ、再帰グループ
-  - SmartArtフォールバック、表、画像、グラデーション / パターン、グラフ
-  - 変換サーバーを使わないブラウザー内HTML / SVG / Canvas描画
-  - アニメーション / トランジションは静止表示
-- 主レンダラーで資料を開けない場合は、従来の `pptx-svg@0.6.5` へ自動フォールバック
-- 日本語のOfficeテーマフォントは、PPTX内のJpan / East Asianフォント指定を優先して Yu Gothic / Meiryo 等のローカルフォントへ解決
-- PowerPointの「挿入 → アイコン」で作られるSVG-only画像（`asvg:svgBlip`、PNGフォールバックなし）を表示
-- PPTXサムネイルでは内部SVGの寸法を壊さず縮小し、文字や図形レイヤーを維持
-- PPTX描画はメイン表示を優先して直列化し、サムネイル生成との同時描画によるプレースホルダー継承の競合を防止
-- PPTX互換性チェックではモーション / メディア / 非表示スライドに加え、描画エラーが発生したスライドも表示
-- PDF.jsによる端末内Canvas描画（標準フォント / CMapも単一HTMLへ内包）
-- PC側プレゼン操作：次へ / 戻る / 直接移動 / キーボード / 黒画面 / 全画面 / タイマー / ポインター
-- テンプレート標準の完全サーバーレスQR WebRTCペアリング
-- WebRTC操作通信を安定化
-  - Controlは順序保証、Pointerは遅延優先の別DataChannel
-  - クライアントセッションID + 連番による重複コマンド抑止
-  - ping / pongによる死活監視と遅延表示
-  - 一時切断時は8秒間の復帰猶予
-  - 復帰後にホスト状態を完全再同期
-  - ポインターチャネルのバッファ詰まりを防止
-  - 対応端末では接続中にScreen Wake Lockを取得し、タブへ戻ったときは自動で再取得。状態も「その他」で確認可能
-  - 一時切断時は8秒の復帰猶予を明示し、復帰できなければ「再接続する」からQRペアリングをやり直せる
-- スマホ側リモコンを発表中の操作に合わせて刷新
-  - 「次へ」を大きく、「戻る」を小さくした誤操作しにくい配置
-  - 左右スワイプでもページ送り
-  - 黒画面 / ポインター / その他を画面下の操作バーへ移動
-  - ポインター有効時だけ操作パネルを展開
-  - タッチポインターとモーションポインターを切り替え可能
-  - モーションポインターは中央合わせ / 固定・再開 / 感度 / デッドゾーン / 手ぶれ補正に対応
-  - 上部のページ番号をタップしてスライド移動シートを開け、「その他」からも同じ操作へ移動可能
-  - 番号ボタン＋直接入力で移動し、大量スライドでは先頭 / 現在付近 / 末尾だけをコンパクトに表示
-  - タイマーリセット / 切断は「その他」に整理
-  - 対応端末では短い振動フィードバックを任意で有効化し、送信成功時はボタンにも短い視覚フィードバックを表示
-  - 先頭 / 最終スライドでは不要な戻る / 次へを無効化
-  - Presenter Viewを標準ONにし、現在スライドを大きく、次スライドを小さく表示
-  - 発表者ノートを折りたたみ表示し、文字サイズを11〜19 pxで調整・端末内保存。長文はノート内だけスクロールし、ページ移動時は先頭へ戻す
-  - 「その他」からPresenter ViewをOFFにして従来のシンプルなリモコンへ戻せる
-  - 短い横画面では下部操作バーを右側の縦バーへ移し、プレビューと「次へ」が同じ画面内に収まるよう最適化
-- Presenter View用のプレビュー転送をWebRTCで実装
-  - プレビュー要求 / 応答は、実際に接続済みである操作用Control Channelを主経路として使用し、3本目のPreview Channelが開かない環境でもPresenter Viewが止まらないようにする
-  - 専用Preview Channelを利用できない場合はControl Channelへ自動フォールバックし、「準備中」のまま停止しない
-  - スマホが必要とする現在＋次の最大2枚だけを約420px幅で生成
-  - PPTXプレビューはPC本体と同じ `@aiden0z/pptx-renderer` の高互換DOMを第一経路にし、現在表示中または左サムネイルですでに描画済みのDOMがあればそれを再利用。未描画なら同じレンダラーを低優先度で裏側描画
-  - 高互換DOM内のHTML / SVG / Canvasを自己完結したプレビューへ変換し、通常はWebP/JPEG、画像化できない場合は自己完結SVGで送信。従来の `pptx-svg` はPresenter Viewでも最後の互換フォールバックに限定
-  - WebP（非対応時JPEG）を8KB単位に分割し、Base64 + JSON後も16KB未満に収まるサイズで送信。スマホ側は最大4枚だけキャッシュ
-  - chunk送信失敗を黙って無視せず転送エラーとして扱う
-  - 受信側のBase64復号はPresenter View本体と同じスコープに置き、chunkを確実に再構成する
-  - プレビュー要求の送信時刻とPCからの進捗受信時刻を分離し、無応答時は30秒で「表示できません」へ遷移する
-  - Presenter Viewの要求開始はglobal roleの確定タイミングに依存させず、Control Channelが使える時点で開始
-  - Preview Channelが一時的に取れない場合もattempt clockを保持して再試行し、30秒で必ず失敗状態へ遷移
-  - 資料未準備・deck revision不一致の要求をPC側で黙って捨てず、進捗応答または状態再同期を返す
-  - 資料変更時はdeck revisionで古いプレビュー / ノートを破棄
-  - Presenter ViewをOFFにするとプレビュー要求を停止
-  - 初回プレビュー生成中の再要求は同じ処理を共有し、準備が長いPPTXでも再試行同士が打ち消し合わない
-  - PPTXプレビュー生成にタイムアウトを設け、画像化が完了しない場合はSVGプレビューへ自動フォールバック
-  - スマホ側には「PCへ依頼中 / 作成中 / 受信中 / 時間がかかっています」を表示し、無期限の「準備中…」状態を作らない
-- PPTX発表者ノートは `slide → relationship → notesSlide` を追い、`body` プレースホルダーから本文を取得
-- PDFでは「PDFにはPowerPointの発表者ノートはありません」と明示
-- スマホが切れてもPC側プレゼンは継続
-- 日本語 / English UI
-- ランタイムCDN・分析タグ・テレメトリなし
+## 主な機能
 
-## プライバシーと通信
+- **PPTX / PDFをそのまま発表** — 最大150 MBの資料を、アップロードや変換サービスを使わずPCのブラウザーで開けます。
+- **スマホをプレゼンリモコンに** — QRで2台のブラウザーを接続し、戻る / 次へ、黒画面、ポインター、タイマー、スライド直接移動を操作できます。
+- **スマホでPresenter View** — 現在スライド、次スライド、PowerPointの発表者ノートを確認しながら操作できます。
+- **PowerPoint互換性を重視した表示** — `@aiden0z/pptx-renderer` を主経路にし、開けない資料では互換レンダラーへフォールバックします。
+- **発表中の使いやすさを重視** — 接続切れ案内、対応端末でのScreen Wake Lock、タッチ / モーションポインター、左右スワイプ、操作フィードバックに対応します。
+- **単一HTMLで配布可能** — 必要なランタイムはビルド時に内包します。実行時CDN、分析タグ、テレメトリ、シグナリングサーバー、STUN、TURNは使用しません。
 
-PPTX / PDF 本体は発表用PCのブラウザー内で処理し、資料ファイルそのものをスマホへ送りません。
+## すぐに使う
 
-スマホへ送るのは、ページ番号・次へ/戻る・ポインター移動などの操作情報に加えて、Presenter ViewをONにしている間の**現在 / 次スライドの低解像度プレビュー**と**発表者ノート**です。プレビューは必要な2枚だけをPC側で約420px幅に生成して送ります。これらはすべてWebRTC DataChannelでPCからスマホへ直接送信します。
+### Webで使う
 
-テンプレート標準の `components/webrtc-qr-pairing.html` を利用し、シグナリングサーバー、STUN、TURNを使わない構成です。そのため基本的に同じWi-Fi / LAN内での利用を想定しています。ゲストWi-Fi、端末分離、VPN、ファイアウォール等では接続できない場合があります。
+発表用PCで [Presentation Remote](https://ttomohisa.github.io/htmlapps-presentation-remote/) を開くだけで利用できます。インストールやアカウント登録は不要です。
 
-## PPTX表示について
+スマホ操作を使う場合はスマホでも同じアプリを開き、後述のQR接続を行います。STUN / TURN / シグナリングサーバーを使わないため、基本的にPCとスマホは同じWi-Fi / LANへ接続してください。
 
-v1.0.0では `@aiden0z/pptx-renderer@1.2.4` を主レンダラーとして使用しています。PowerPoint実出力とのビジュアル回帰を前提にしたレンダラーで、今回特に崩れが大きかったマスター / レイアウト背景、SmartArt、グループ / コネクタ、文字スタイル継承を主経路で再構築します。
+### 単一HTMLをビルドして使う
 
-Presenter Viewの現在 / 次プレビューもPC表示と同じ主レンダラーのDOMから生成するため、背景色・テーマ色・文字・図形の描画経路をPC側と揃えています。従来の `pptx-svg@0.6.5` は削除せず、主レンダラーでPPTXを開けなかった場合や高互換プレビュー生成自体が失敗した場合の互換フォールバックとして残しています。フォールバック発生や要素単位の描画エラーは互換性チェックへ表示します。
+1. Windows 10 / 11でこのリポジトリをダウンロードまたはクローンします。
+2. `build-standalone.bat` を実行します。
+3. 初回のみ、`dependencies.json` で固定した依存パッケージを取得します。
+4. 生成された `dist/index.html` を開きます。
 
-フォントファイルそのものをBrowser Kittyが配布するわけではありません。PPTXに埋め込みフォントがある場合は主レンダラーの埋め込みフォント処理を使い、埋め込みがないOfficeテーマフォントは端末にインストール済みのフォントから解決します。特に日本語ではJpan / East Asian指定を優先し、Yu Gothic / Meiryo / Noto Sans JP等へフォールバックします。PowerPoint UIで表示される「メイリオ 見出し」「メイリオ 本文」のようなテーマ用ラベルは、ブラウザーが実際に利用できる Meiryo へ解決します。
+標準ビルドではWindows PowerShellとWindows標準の `tar.exe` を使用します。Node.jsやPythonは不要です。
 
-ただしPowerPoint本体ではないため完全なピクセル一致は保証しません。アニメーション / トランジションは静止表示です。見た目の完全一致が必要な資料では、引き続きPDF書き出しを推奨します。
+## 使い方
 
-## 操作
+1. 発表用PCでアプリを開き、PPTXまたはPDFを選択します。
+2. 左側のスライド一覧で内容を確認し、全画面にするときは **プレゼン開始** を押します。
+3. スマホを接続する場合は、PCで **スマホを接続** を押します。
+4. スマホでアプリを開いて **スマホで操作** を選び、PCに表示された接続QRを読み取ります。
+5. スマホに返答QRが表示されるので、PCで読み取るとWebRTC接続が完了します。
+6. 大きな **次へ**、**戻る**、または左右スワイプでページを移動します。Presenter Viewでは現在 / 次スライドと発表者ノートを確認できます。
+7. 上部のスライド番号をタップすると、番号一覧または直接入力でスライドへ移動できます。Presenter View、振動、タイマー、再接続 / 切断は **その他** にまとめています。
 
-### PC
+### Presenter View
 
-発表するPCでは、PPTX / PDFをドラッグ&ドロップするか「PPTX / PDFを選択」から資料を開きます。スマホ側は「スマホで操作」から接続できます。
+スマホではPresenter Viewが標準でONになります。
 
-- `→` / `↓` / `PageDown` / `Space`: 次へ
-- `←` / `↑` / `PageUp`: 戻る
-- `Home`: 最初へ
-- `End`: 最後へ
-- `B`: 黒画面の切り替え
-- `F`: 全画面の切り替え
+- 現在スライドを大きく、次スライドを小さく表示します。
+- PowerPointの発表者ノートを開閉できます。
+- ノート文字サイズは11〜19 pxで変更でき、そのスマホ内に保存します。
+- 長いノートはノート欄だけをスクロールし、主要操作を画面外へ押し出しません。
+- PPTXプレビューは可能な限りPC側と同じ主レンダラーから生成し、背景色・文字・図形などの表示経路を揃えています。
+- PDFにはPowerPointの発表者ノートがないため、その旨を画面に表示します。
 
-ブラウザーの制限により、全画面開始はPC側でボタンまたはキー操作を行う必要があります。
+**その他** からPresenter ViewをOFFにすると、プレビューを使わないシンプルなリモコンへ戻せます。
 
-### スマホ
+### ポインター操作
 
-1. PCで資料を開きます。
-2. PCの「スマホを接続」からOffer QRを表示します。
-3. スマホで「スマホで操作」を開き、PCのQRを読み取ります。
-4. スマホが生成したAnswer QRをPCで読み取ります。
-5. 接続後、Presenter Viewが表示されます。現在スライドを大きく、次スライドを小さく確認でき、発表者ノートは必要なときだけ開けます。ノートの `A− / A＋` で文字サイズを調整できます。
-6. 上部の `1 / 20` のようなページ番号をタップすると、番号一覧または直接入力からスライドへ移動できます。
-7. 接続が不安定になった場合は操作を一時停止して復帰を待ち、復帰できない場合は「再接続する」からQRペアリングをやり直します。対応ブラウザーでは接続中に画面スリープも抑制します。
-8. 「その他」からPresenter ViewをOFFにすると従来のシンプルなリモコンに戻れます。
-9. ポインターを表示すると「タッチ / モーション」を切り替えられます。モーションでは初回にセンサーを許可し、スマホを画面中央へ向けた状態で「中央を合わせる」を押してください。
+スマホから2種類の方法でポインターを操作できます。
+
+- **タッチ** — 指の移動に合わせてポインターを動かします。
+- **モーション** — ブラウザー / OSが対応している場合、Device Orientationセンサーでスマホの向きから操作します。
+
+モーションモードには中央合わせ、固定 / 再開、感度、デッドゾーン、手ぶれ補正があります。センサーの利用可否や権限の挙動はブラウザー / OSによって異なります。
+
+### PCのキーボード操作
+
+| ショートカット | 操作 |
+| --- | --- |
+| `→` / `↓` / `PageDown` / `Space` | 次のスライド |
+| `←` / `↑` / `PageUp` | 前のスライド |
+| `Home` | 最初のスライド |
+| `End` | 最後のスライド |
+| `B` | 黒画面の切り替え |
+| `F` | 全画面の切り替え |
+
+ブラウザーの制限により、全画面開始には発表用PC側でのユーザー操作が必要です。
 
 ## 対応ブラウザー
 
-- Chrome / Edgeを主要対象として確認します。
-- Safariは必要なWebRTC APIが利用できる範囲でリモコン操作に対応します。モーションセンサーやWake Lockの可否はOS / ブラウザーのバージョンに依存します。
-- Firefoxでも基本機能が動作する場合がありますが、リリース時の主要確認対象はChrome / Edgeです。
-- モーションポインターはHTTPSなどのセキュアコンテキストとDevice Orientation対応ブラウザーが必要です。
-- 全画面表示の開始はブラウザー制約により発表用PC側のユーザー操作が必要です。
+- Chrome / Edgeを主要対象として確認しています。
+- Safariは必要なWebRTC APIが利用できる範囲で基本的なリモコン操作に対応します。Screen Wake Lockやモーションセンサーの挙動はOS / ブラウザーのバージョンに依存します。
+- Firefoxでも基本機能が動作する場合がありますが、主要なリリース確認対象ではありません。
+- モーションポインターにはDevice Orientation対応とHTTPSなどのセキュアコンテキストが必要です。
+- 全画面表示はブラウザー制約により、発表用PC側のユーザー操作が必要です。
 
-## ビルド
+## GitHub Pagesで公開する
 
-Windows 10 / 11で:
+このリポジトリには、必要な依存を内包した単一HTMLをビルドし、`dist/` をGitHub Pagesへ公開するワークフローが含まれています。
 
-```bat
-build-standalone.bat
-```
+1. リポジトリ名を `htmlapps-presentation-remote` としてGitHubへプッシュします。
+2. **Settings → Pages → Build and deployment → Source** で **GitHub Actions** を選択します。
+3. `main` へプッシュするか、Actionsから **Deploy standalone app to GitHub Pages** を手動実行します。
+4. 成功後、`https://ttomohisa.github.io/htmlapps-presentation-remote/` で利用できます。
 
-生成物:
+ビルド時には `scripts/check-repository.ps1` を実行し、固定依存から単一HTMLを再生成して、リポジトリ構成と生成物を検証してから公開します。
 
-```text
-dist/
-├─ index.html
-├─ index.self-extract.html
-├─ dependency-manifest.json
-├─ build-size-report.json
-├─ self-extract-manifest.json
-└─ .nojekyll
-```
-
-`dependencies.json` では `qrcode-generator@1.4.4`、`jsqr@1.4.0`、主PPTXレンダラー `@aiden0z/pptx-renderer@1.2.4`、互換フォールバック `pptx-svg@0.6.5`、`pdfjs-dist@6.3.289` を固定しています。ビルド時に必要資産を単一HTMLへ内包し、実行時CDNは使いません。
-
-## 開発
-
-主なファイル:
+## 開発とビルド
 
 ```text
-src/index.template.html          アプリ本体
-components/webrtc-qr-pairing.html
-APP_SPEC.md                      製品仕様
-app.config.json                  アプリ / ビルド設定
-dependencies.json                固定依存関係
+.
+├─ src/index.template.html          # アプリ本体テンプレート
+├─ components/                      # 共通UI / WebRTCコンポーネント
+├─ dependencies.json                # 固定依存と内包対象
+├─ app.config.json                  # アプリ情報 / ビルド設定
+├─ build-standalone.bat             # Windows用ビルド入口
+├─ build-standalone.ps1             # 単一HTMLビルダー
+├─ scripts/check-repository.ps1     # リポジトリ / ビルド検証
+├─ dist/index.html                  # 生成される単一HTML
+└─ .github/workflows/
+   ├─ build-standalone.yml          # Pull Request時のビルド検証
+   └─ deploy-pages.yml              # mainからPagesへ自動公開
 ```
 
-実装ルールは [AGENTS.md](AGENTS.md)、WebRTC部品の仕様は [docs/WEBRTC_QR_PAIRING.ja.md](docs/WEBRTC_QR_PAIRING.ja.md) を参照してください。
+### 依存ライブラリを更新する
 
-## 今後の候補
+`dependencies.json` のバージョンと内包パスを更新してから再ビルドします。
 
-- 長時間の発表を想定し、スマホ / ブラウザーの組み合わせを増やして連続動作を確認する
-- 実PPTXの回帰セットを増やし、PowerPointとの差分を継続的に縮める
-- 発表者向け情報を増やす場合も、スマホ画面の主要操作を圧迫しない範囲に留める
+キャッシュを破棄して固定パッケージを取得し直す場合:
 
-## License
-
-MIT License。第三者ライブラリの表記は [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) を参照してください。
-
-## 開発中のスマホ接続
-
-`start-dev.bat` を実行すると、単一HTMLをビルドし、PCには `http://127.0.0.1` のローカル開発ページ、スマホにはCloudflare Quick Tunnelによる一時 `https://*.trycloudflare.com` URLを用意します。スマホ側が正規HTTPSになるため、ブラウザー内のカメラ / QRスキャナーを開発中も利用できます。
-
-```bat
-start-dev.bat
+```powershell
+./build-standalone.ps1 -ForceDownload
 ```
 
-初回だけ `cloudflared` が見つからない場合は `.tools/` へ開発用実行ファイルを取得します。Pythonは不要です。生成する単一HTMLや本番配布物に `cloudflared` は含めません。
+ビルド処理では以下を行います。
 
-PCの「開発用にスマホ接続」を押すと、スマホ標準カメラで1回読むためのQRを表示します。Offer / Answerだけを開発サーバーのメモリで一時中継し、PPTX / PDF本体は送信しません。開発用HTTPSトンネル経由ではアプリHTMLとシグナリング通信がCloudflareを通りますが、本番の単一HTMLは従来どおりシグナリングサーバーなしの2段階QRペアリングです。
+- キャッシュにない固定バージョンのnpmパッケージを取得
+- 必要なJavaScript、WebAssembly、PDF.js Worker、CMap、標準フォント資産を生成HTMLへ内包
+- 設定された資産をgzip圧縮
+- 依存関係 / ビルドサイズのマニフェストを生成
+- 必須ファイルや共通コンポーネントの契約を検証
+- 通常版と自己展開版の単一HTMLを検証
 
-一度ビルド済みなら `start-dev-no-build.bat` で再ビルドを省略できます。
+## プライバシーと通信
+
+PPTX / PDFの資料本体は発表用PCのブラウザー内に残り、アプリからサーバーへアップロードしません。
+
+スマホ接続時にPCからスマホへ送信するものは以下です。
+
+- スライド番号やプレゼン状態
+- リモコン操作 / ポインター情報
+- Presenter ViewをONにしている間の現在 / 次スライドの低解像度プレビュー
+- 現在スライドのPowerPoint発表者ノート
+
+これらはWebRTC DataChannelで2台のブラウザー間を直接送信します。Presentation Remoteはシグナリングサーバー、STUN、TURNを使わないため、基本的に同じWi-Fi / LAN内で直接通信できる必要があります。ゲストWi-Fi、端末分離、VPN、ファイアウォールなどでは接続できない場合があります。
+
+GitHub Pages版ではページを開くための最初のHTML通信は発生します。必要なランタイムはHTMLへ内包し、実行時にCDNから読み込みません。
+
+## 制限事項
+
+- PowerPoint互換性を重視して表示しますが、PowerPoint本体ではありません。複雑な効果は差が出る場合があり、アニメーション / 画面切り替えは静止表示です。
+- 見た目の厳密な一致が必要な資料では、事前にPDFへ書き出して利用するとより安定します。
+- PDFにはPowerPointの発表者ノートはありません。
+- 全画面開始はブラウザー制約により発表用PC側で操作する必要があります。
+- STUN / TURNによる中継を行わないため、ゲストWi-Fi、端末分離、VPN、厳しいファイアウォール環境ではWebRTC接続できない場合があります。
+- Screen Wake Lock、振動、Device Orientation、カメラ権限はブラウザー / OSの対応状況に依存します。
+- ページ数が多い資料や複雑なPPTX / PDFでは端末メモリを多く使用します。現在のUIでは1ファイル150 MBまでです。
+- Presenter ViewをONにすると低解像度スライドプレビューと発表者ノートをスマホへ送ります。スマホ側に不要な場合はPresenter ViewをOFFにしてください。
+
+## 使用ライブラリ
+
+| ライブラリ | バージョン | ライセンス | 用途 |
+| --- | ---: | --- | --- |
+| qrcode-generator | 1.4.4 | MIT | 直接接続用QRコード生成 |
+| jsQR | 1.4.0 | Apache-2.0 | QRコード読み取りのフォールバック |
+| @aiden0z/pptx-renderer | 1.2.4 | Apache-2.0 | PPTX解析 / 主描画 |
+| pptx-svg | 0.6.5 | MIT | PPTX互換フォールバック |
+| pdfjs-dist | 6.3.289 | Apache-2.0 | PDF解析 / Canvas描画 |
+
+第三者ライブラリの詳細は [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) を確認してください。
+
+## コントリビューション
+
+バグ報告や機能提案はGitHub Issuesからお願いします。開発への参加方法は [CONTRIBUTING.md](CONTRIBUTING.md) を確認してください。
+
+## ライセンス
+
+Copyright © 2026 ttomohisa
+
+このプロジェクトは [MIT License](LICENSE) で公開されています。
