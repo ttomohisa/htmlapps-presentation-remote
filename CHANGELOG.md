@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3 - 2026-09-01
+
+- Treat the control DataChannel as the reusable pairing component's default channel, so application connection is not reported until both ICE and the control channel are ready.
+- Prevent the phone pairing dialog from closing during the narrow interval where ICE is connected but the control DataChannel is still opening.
+- Close the pairing dialog only after the control channel has opened and the application transport is marked recovered.
+
 ## 1.0.2 - 2026-09-01
 
 - Restore the intended WebRTC channel isolation: Presenter View preview traffic now uses the dedicated ordered `presentation-preview` DataChannel instead of preferring `presentation-control`.

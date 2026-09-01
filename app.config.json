@@ -3,7 +3,7 @@
   "name": "Browser Kitty Presentation Remote",
   "nameJa": "Browser Kitty プレゼンテーションリモート",
   "slug": "presentation-remote",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Open a local PPTX or PDF and control it from a phone with direct WebRTC, slide previews, and speaker notes.",
   "descriptionJa": "手元のPPTX / PDFをブラウザーで開き、現在・次スライドのプレビューや発表者ノートを見ながらスマホからWebRTCで操作するプレゼンツールです。",
   "defaultLanguage": "auto",

@@ -12,7 +12,7 @@ The application is local-first and account-free. The selected deck stays on the 
 
 ## 2. Release target
 
-- Version: `1.0.2`
+- Version: `1.0.3`
 - One-file readable build: `dist/index.html`
 - One-file self-extracting build: `dist/index.self-extract.html`
 - Japanese and English in the same HTML.
@@ -383,7 +383,7 @@ The production build embeds PDF.js packed CMaps and standard-font files from the
 - A dedicated preview-channel failure MUST NOT degrade remote navigation/control. Presenter View may become temporarily unavailable while the control channel remains fully responsive.
 
 
-## WebRTC channel isolation and recovery (v1.0.2)
+## WebRTC channel isolation and recovery (v1.0.3)
 
 - `presentation-control` is reserved for commands, state synchronization, hello/ping/pong and acknowledgements.
 - `presentation-preview` is the normal transport for Presenter View requests, status, notes and image chunks. Bulk preview image chunks MUST NOT be sent over the control channel.
