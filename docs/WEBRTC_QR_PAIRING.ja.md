@@ -278,9 +278,12 @@ host candidateが1件以上あることを確認
 - IPv4 / IPv6 / mDNS
 - ICE connection state
 - PeerConnection state
-- 選択candidate pair概要
+- 選択candidate pair概要とRTT（取得できる場合）
+- candidate pairの試行数（成功 / 確認中 / 失敗）
+- `getStats()` が提供する疎通確認カウンター（送信、応答受信、受信、応答送信）
+- 失敗時の推定原因（候補ペア未作成、疎通確認未開始、返答なし、片方向通信など）
 
-プライバシーのため、candidateのIPアドレスそのものは画面へ表示しません。
+ICE確認中は約1秒ごとに診断を更新し、接続・失敗・終了時にポーリングを停止します。プライバシーのため、candidateのIPアドレスそのものは画面へ表示しません。
 
 ## 再試行ルール
 

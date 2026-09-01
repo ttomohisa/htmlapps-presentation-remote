@@ -104,7 +104,7 @@ must('hostInflight:new Map()', 'shared in-flight slide preview generation');
 mustMatch(/const token=state\.preview\.hostToken,indexes=/, 'preview retry does not invalidate in-flight generation');
 if (/respondPresenterRequest\([\s\S]*?\+\+state\.preview\.hostToken/.test(html)) throw new Error('Presenter preview requests must not cancel in-flight preview generation');
 mustMatch(/channel\.label===PREVIEW_CHANNEL&&channel\.readyState===['"]open['"]&&role===['"]join['"][\s\S]*?scheduleRemotePreviewRequest\(true\)/, 'already-open preview channel triggers request');
-must('id="versionBadge">v1.0.0', 'visible v1.0.0 badge');
+must('id="versionBadge">v1.0.1', 'visible v1.0.1 badge');
 must('@media(max-height:560px) and (orientation:landscape) and (max-width:1000px)', 'short landscape layout');
 must('.remote-mode .remote-tools{left:auto;right:7px;', 'landscape side action rail');
 
@@ -115,4 +115,4 @@ for (const stale of [
   if (html.includes(stale)) throw new Error(`Stale privacy claim remains: ${stale}`);
 }
 
-console.log('Presenter View v1.0.0 protocol / timeout / fidelity / fallback / DOM / privacy regression checks passed.');
+console.log('Presenter View v1.0.1 protocol / timeout / fidelity / fallback / DOM / privacy regression checks passed.');

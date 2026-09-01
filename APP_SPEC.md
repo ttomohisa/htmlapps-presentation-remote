@@ -12,7 +12,7 @@ The application is local-first and account-free. The selected deck stays on the 
 
 ## 2. Release target
 
-- Version: `1.0.0`
+- Version: `1.0.1`
 - One-file readable build: `dist/index.html`
 - One-file self-extracting build: `dist/index.self-extract.html`
 - Japanese and English in the same HTML.
@@ -381,6 +381,19 @@ The production build embeds PDF.js packed CMaps and standard-font files from the
 - A failed preview metadata/chunk send MUST be surfaced as a transfer failure; silently dropping a chunk is not allowed.
 - If the request arrives over the control-channel fallback, the host SHOULD reply on that same channel for the request so asymmetric preview-channel readiness cannot strand the transfer.
 - A dedicated preview-channel failure MUST NOT prevent Presenter View from requesting previews while the reliable control channel remains open.
+
+## WebRTC connection diagnostics (v1.0.1)
+
+When direct pairing fails after local and remote ICE candidates have been collected, the connection panel must inspect `RTCPeerConnection.getStats()` candidate-pair reports instead of showing only a generic failure message.
+
+The detailed diagnostics must show:
+
+- candidate-pair attempts: total / succeeded / checking / failed
+- connectivity-check counters when exposed by the browser: requests sent, responses received, requests received, responses sent
+- the selected candidate pair and round-trip time when available
+- a plain-language likely-cause message for common failure shapes such as no compatible pair, checks never starting, outbound checks receiving no reply, inbound checks not being answered, and asymmetric connectivity
+
+Diagnostics must not display raw local or remote IP addresses. While ICE is checking, the stats view refreshes periodically and stops polling when the peer connects, fails, or is closed.
 
 ## Phone remote UX requirements (v1.0.0)
 

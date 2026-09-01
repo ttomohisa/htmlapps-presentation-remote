@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.1 - 2026-09-01
+
+- Expand direct-WebRTC diagnostics with candidate-pair attempt counts and connectivity-check send/receive counters from `RTCPeerConnection.getStats()`.
+- Add plain-language likely-cause guidance for no compatible pair, no connectivity checks, no reply, local reply failure, asymmetric connectivity, and successful-but-unselected pairs.
+- Refresh diagnostics once per second while ICE is checking and stop polling after connect/fail/close.
+- Keep candidate diagnostics privacy-preserving by reporting transport/type/address family rather than raw IP addresses.
+
 ## 1.0.0 - 2026-09-01
 
 - Promote Presentation Remote to the first stable release after the v0.9.0 live-presentation UX pass and the v0.8.x Presenter View reliability/fidelity fixes.

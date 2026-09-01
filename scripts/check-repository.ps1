@@ -67,7 +67,7 @@ $componentContracts = @(
   @{ Path = "components\popover-menu.html"; Tokens = @("window.AppPopoverMenu", "data-popover-trigger", "aria-expanded", "Escape") },
   @{ Path = "components\setting-field.html"; Tokens = @("window.AppSettingField", "data-setting-custom", "data-setting-range", "settingchange") },
   @{ Path = "components\async-state.html"; Tokens = @("window.AppAsyncState", "invalidateSource", "captureGeneration", "isCurrent") },
-  @{ Path = "components\webrtc-qr-pairing.html"; Tokens = @("window.AppWebRtcQrPairing", "iceServers:[]", "waitForIceComplete", "BarcodeDetector", "answerAutoRetryLimit", "StandaloneAssets", "createJoinAnswer", "payloadPrefix", "qrPrefix") }
+  @{ Path = "components\webrtc-qr-pairing.html"; Tokens = @("window.AppWebRtcQrPairing", "iceServers:[]", "waitForIceComplete", "BarcodeDetector", "answerAutoRetryLimit", "StandaloneAssets", "createJoinAnswer", "payloadPrefix", "qrPrefix", "candidatePairDiagnostics", "classifyCandidatePairStats", "diagLikelyCause") }
 )
 foreach ($contract in $componentContracts) {
   $componentText = Get-Content -Raw -Encoding UTF8 (Join-Path $Root $contract.Path)

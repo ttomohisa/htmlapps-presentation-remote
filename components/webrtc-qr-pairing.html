@@ -161,7 +161,7 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
       copy:'コピー', copied:'コピーしました', copyFailed:'コピーできませんでした',
       cameraUnsupported:'このブラウザーではカメラを利用できません。手動の接続コードを使ってください。', cameraFailed:'カメラを開始できませんでした。権限とカメラ利用状況を確認してください。', qrFailed:'QRを生成できませんでした', invalidSignal:'接続情報を読み取れませんでした',
       iceTimeout:'LAN接続候補の収集が15秒以内に完了しませんでした。不完全な接続情報は使わず、今回の試行を破棄しました。', noLocal:'この端末でLAN接続候補を取得できませんでした。', noRemote:'相手の接続情報にLAN接続候補がありません。', connectionClosed:'古い接続試行は破棄されました。',
-      diagGather:'ICE収集', diagLocal:'ローカル候補', diagRemote:'相手候補', diagIce:'ICE状態', diagPeer:'接続状態', diagPair:'候補ペア', diagNoPair:'まだ確立していません', diagNoLocal:'LAN接続候補がありません。ブラウザー/ネットワーク構成を確認してください。', diagNoRemote:'相手のLAN候補がありません。接続情報を作り直してください。', diagPairFailed:'候補は取得できましたが接続経路を確立できませんでした。mDNS、端末分離、VPN、ファイアウォールを確認してください。',
+      diagGather:'ICE収集', diagLocal:'ローカル候補', diagRemote:'相手候補', diagIce:'ICE状態', diagPeer:'接続状態', diagPair:'候補ペア', diagNoPair:'まだ確立していません', diagPairTests:'候補ペア試行', diagPairSuccess:'成功', diagPairChecking:'確認中', diagPairFailedCount:'失敗', diagConnectivity:'疎通確認', diagSent:'送信', diagRepliesReceived:'応答受信', diagReceived:'受信', diagRepliesSent:'応答送信', diagLikelyCause:'推定原因', diagNoLocal:'LAN接続候補がありません。ブラウザー/ネットワーク構成を確認してください。', diagNoRemote:'相手のLAN候補がありません。接続情報を作り直してください。', diagPairFailed:'候補は取得できましたが接続経路を確立できませんでした。mDNS、端末分離、VPN、ファイアウォールを確認してください。', diagRouteNoPairs:'ローカル候補と相手候補はありますが、組み合わせ可能な候補ペアを作成できていません。IPv4 / IPv6、mDNS、ネットワーク構成の違いを確認してください。', diagRouteNoChecks:'候補ペアは作成されましたが疎通確認を開始できていません。mDNS名解決、VPN、ブラウザーやネットワークの制限を確認してください。', diagRouteOutboundNoReply:'この端末から相手へ疎通確認を送っていますが、返答が届いていません。同じWi-Fiでもゲストネットワーク / 端末分離、VPN、ファイアウォールでUDPが遮断されている可能性があります。', diagRouteInboundNoReply:'相手からの疎通確認は届いていますが、この端末から返答できていません。この端末側のVPN、ファイアウォール、セキュリティソフトを確認してください。', diagRouteAsymmetric:'相手からの疎通確認には返答できていますが、こちらから送った確認への返答が戻っていません。片方向の通信遮断が疑われます。両端末のVPNとファイアウォールを確認してください。', diagRouteChecksResponded:'疎通確認への返答は届いていますが、接続確立まで進めませんでした。接続QRを作り直して再試行してください。', diagRouteSucceededNotSelected:'疎通に成功した候補ペアがありますが接続用として選択されませんでした。接続QRを作り直して再試行してください。',
       stateNew:'未開始', stateGathering:'収集中', stateComplete:'完了', stateChecking:'確認中', stateConnected:'接続済み', stateCompleted:'完了', stateConnecting:'接続確認中', stateDisconnected:'一時切断', stateFailed:'失敗', stateClosed:'終了',
       connectedBody:'WebRTC接続が確立しました。DataChannelが開くとアプリデータを送れます。', disconnect:'切断', startOver:'新しい接続を開始'
     },
@@ -196,7 +196,7 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
       copy:'Copy', copied:'Copied', copyFailed:'Could not copy',
       cameraUnsupported:'This browser cannot use the camera here. Use the manual connection-code fallback.', cameraFailed:'Could not start the camera. Check permission and whether another app is using it.', qrFailed:'Could not generate QR code', invalidSignal:'Could not read the connection information',
       iceTimeout:'LAN candidate gathering did not complete within 15 seconds. The incomplete attempt was discarded.', noLocal:'This device did not produce any LAN candidates.', noRemote:'The peer connection information contains no LAN candidates.', connectionClosed:'The old connection attempt was discarded.',
-      diagGather:'ICE gathering', diagLocal:'Local candidates', diagRemote:'Remote candidates', diagIce:'ICE state', diagPeer:'Connection state', diagPair:'Candidate pair', diagNoPair:'not established yet', diagNoLocal:'No LAN candidates were found. Check the browser and network configuration.', diagNoRemote:'The peer has no LAN candidates. Recreate the connection information.', diagPairFailed:'Candidates were found, but no direct route could be established. Check mDNS reachability, client isolation, VPNs, and firewalls.',
+      diagGather:'ICE gathering', diagLocal:'Local candidates', diagRemote:'Remote candidates', diagIce:'ICE state', diagPeer:'Connection state', diagPair:'Candidate pair', diagNoPair:'not established yet', diagPairTests:'Candidate-pair checks', diagPairSuccess:'succeeded', diagPairChecking:'checking', diagPairFailedCount:'failed', diagConnectivity:'Connectivity checks', diagSent:'sent', diagRepliesReceived:'replies received', diagReceived:'received', diagRepliesSent:'replies sent', diagLikelyCause:'Likely cause', diagNoLocal:'No LAN candidates were found. Check the browser and network configuration.', diagNoRemote:'The peer has no LAN candidates. Recreate the connection information.', diagPairFailed:'Candidates were found, but no direct route could be established. Check mDNS reachability, client isolation, VPNs, and firewalls.', diagRouteNoPairs:'Local and remote candidates exist, but no compatible candidate pair was created. Check IPv4 / IPv6 reachability, mDNS, and the network configuration.', diagRouteNoChecks:'Candidate pairs were created, but connectivity checks did not start. Check mDNS resolution, VPNs, browser restrictions, and network policy.', diagRouteOutboundNoReply:'This device sent connectivity checks to the peer, but no replies came back. Guest/client isolation, a VPN, or a firewall may be blocking UDP even on the same Wi-Fi.', diagRouteInboundNoReply:'Connectivity checks from the peer reached this device, but this device did not send replies. Check the VPN, firewall, or security software on this device.', diagRouteAsymmetric:'This device can reply to checks from the peer, but replies to checks sent by this device are not coming back. One-way blocking is likely; check VPNs and firewalls on both devices.', diagRouteChecksResponded:'Connectivity-check replies arrived, but the connection still did not become established. Recreate the connection QR and try again.', diagRouteSucceededNotSelected:'At least one candidate pair succeeded, but it was not selected for the connection. Recreate the connection QR and try again.',
       stateNew:'new', stateGathering:'gathering', stateComplete:'complete', stateChecking:'checking', stateConnected:'connected', stateCompleted:'completed', stateConnecting:'connecting', stateDisconnected:'disconnected', stateFailed:'failed', stateClosed:'closed',
       connectedBody:'The WebRTC connection is established. Application data can flow once the DataChannel is open.', disconnect:'Disconnect', startOver:'Start a new connection'
     }
@@ -254,8 +254,8 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
 
     const state = {
       role:'',
-      host:{ pc:null, channel:null, attempt:0, everConnected:false, offerCode:'', answerApplied:false, failureHandling:false },
-      join:{ pc:null, channel:null, pendingOffer:null, attempt:0, everConnected:false, answerCode:'', answerState:'idle', autoRetryCount:0, autoRetryTimer:0, failureHandling:false },
+      host:{ pc:null, channel:null, attempt:0, everConnected:false, offerCode:'', answerApplied:false, failureHandling:false, diagnosticTimer:0, diagnosticBusy:false },
+      join:{ pc:null, channel:null, pendingOffer:null, attempt:0, everConnected:false, answerCode:'', answerState:'idle', autoRetryCount:0, autoRetryTimer:0, failureHandling:false, diagnosticTimer:0, diagnosticBusy:false },
       qr:{ hostPages:[], hostIndex:0, hostTimer:0, joinPages:[], joinIndex:0, joinTimer:0 },
       scanner:{ mode:'', stream:null, frame:0, decoder:null, canvasCtx:null, lastDecode:0, session:'', total:0, parts:new Map() },
       connected:false,
@@ -346,14 +346,64 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
     function summarizeIce(sdp) { const groups=new Map(), candidates=parseIceCandidates(sdp); for(const c of candidates){const key=[c.protocol,c.type,addressKind(c.address),c.tcpType].filter(Boolean).join(' ');groups.set(key,(groups.get(key)||0)+1);} return {count:candidates.length,details:Array.from(groups.entries()).map(([key,count])=>`${key} ×${count}`).join(', ')}; }
     function stateLabel(value) { const key={new:'stateNew',gathering:'stateGathering',complete:'stateComplete',checking:'stateChecking',connected:'stateConnected',completed:'stateCompleted',connecting:'stateConnecting',disconnected:'stateDisconnected',failed:'stateFailed',closed:'stateClosed'}[value]; return key?t(key):String(value||'—'); }
     function candidateReportLabel(report) { if(!report)return'—'; const protocol=String(report.protocol||'?').toUpperCase(), type=String(report.candidateType||'?'), kind=addressKind(report.address||report.ip||''); const tcp=report.tcpType?` ${report.tcpType}`:''; return `${protocol} ${type} ${kind}${tcp}`; }
-    async function selectedPairLabel(pc) { if(!pc||pc.signalingState==='closed')return''; try{const stats=await pc.getStats(), map=new Map();stats.forEach(r=>map.set(r.id,r));let pair=null;stats.forEach(r=>{if(r.type==='transport'&&r.selectedCandidatePairId)pair=map.get(r.selectedCandidatePairId)||pair;});if(!pair)stats.forEach(r=>{if(!pair&&r.type==='candidate-pair'&&r.state==='succeeded'&&r.nominated)pair=r;});if(!pair)return'';return `${candidateReportLabel(map.get(pair.localCandidateId))} ↔ ${candidateReportLabel(map.get(pair.remoteCandidateId))}`;}catch{return'';} }
-    async function updateDiagnostics(role, pc, extra={}) { const el=q(`[data-diagnostic="${role}"]`); if(!el||!pc)return; const local=summarizeIce(pc.localDescription?.sdp), remote=summarizeIce(pc.remoteDescription?.sdp), pair=await selectedPairLabel(pc); const lines=[`${t('diagGather')}: ${stateLabel(pc.iceGatheringState)}`,`${t('diagLocal')}: ${local.count}${local.details?` · ${local.details}`:''}`]; if(pc.remoteDescription)lines.push(`${t('diagRemote')}: ${remote.count}${remote.details?` · ${remote.details}`:''}`);lines.push(`${t('diagIce')}: ${stateLabel(pc.iceConnectionState)}`,`${t('diagPeer')}: ${stateLabel(pc.connectionState)}`);if(pc.remoteDescription)lines.push(`${t('diagPair')}: ${pair||t('diagNoPair')}`);if(extra.note)lines.push(extra.note);else if(local.count===0&&pc.iceGatheringState==='complete')lines.push(t('diagNoLocal'));else if(pc.remoteDescription&&remote.count===0)lines.push(t('diagNoRemote'));else if(pc.iceConnectionState==='failed'||pc.connectionState==='failed')lines.push(t('diagPairFailed'));el.hidden=false;el.classList.toggle('is-warning',Boolean(extra.warning)||(local.count===0&&pc.iceGatheringState==='complete')||(pc.remoteDescription&&remote.count===0)||['failed','disconnected'].includes(pc.iceConnectionState)||['failed','disconnected'].includes(pc.connectionState));el.textContent=lines.join('\n'); }
+    function statCounter(report,key) { const value=Number(report?.[key]); return Number.isFinite(value)&&value>0?value:0; }
+    function classifyCandidatePairStats(summary, pc) {
+      if(!pc?.remoteDescription)return'';
+      if(!summary.available)return'diagPairFailed';
+      if(!['failed'].includes(pc.iceConnectionState)&&!['failed'].includes(pc.connectionState))return'';
+      if(summary.total===0)return'diagRouteNoPairs';
+      if(summary.succeeded>0&&!summary.selectedLabel)return'diagRouteSucceededNotSelected';
+      if(!summary.hasCounters)return'diagPairFailed';
+      if(summary.requestsSent===0&&summary.requestsReceived===0)return'diagRouteNoChecks';
+      if(summary.requestsReceived>0&&summary.responsesSent===0)return'diagRouteInboundNoReply';
+      if(summary.requestsSent>0&&summary.responsesReceived===0&&summary.requestsReceived===0)return'diagRouteOutboundNoReply';
+      if(summary.requestsSent>0&&summary.responsesReceived===0&&summary.requestsReceived>0&&summary.responsesSent>0)return'diagRouteAsymmetric';
+      if(summary.responsesReceived>0)return'diagRouteChecksResponded';
+      return'diagPairFailed';
+    }
+    async function candidatePairDiagnostics(pc) {
+      const empty={available:false,total:0,succeeded:0,checking:0,failed:0,requestsSent:0,responsesReceived:0,requestsReceived:0,responsesSent:0,hasCounters:false,selectedLabel:'',rttMs:null};
+      if(!pc||pc.signalingState==='closed')return empty;
+      try{
+        const stats=await pc.getStats(), map=new Map(), pairs=[];stats.forEach(r=>map.set(r.id,r));stats.forEach(r=>{if(r.type==='candidate-pair')pairs.push(r);});
+        let selected=null;stats.forEach(r=>{if(r.type==='transport'&&r.selectedCandidatePairId)selected=map.get(r.selectedCandidatePairId)||selected;});if(!selected)selected=pairs.find(r=>r.state==='succeeded'&&r.nominated)||null;
+        const summary={...empty,available:true,total:pairs.length};
+        for(const pair of pairs){
+          if(pair.state==='succeeded')summary.succeeded+=1;else if(pair.state==='failed')summary.failed+=1;else summary.checking+=1;
+          for(const key of ['requestsSent','responsesReceived','requestsReceived','responsesSent']){if(Object.prototype.hasOwnProperty.call(pair,key))summary.hasCounters=true;summary[key]+=statCounter(pair,key);}
+        }
+        if(selected){summary.selectedLabel=`${candidateReportLabel(map.get(selected.localCandidateId))} ↔ ${candidateReportLabel(map.get(selected.remoteCandidateId))}`;const rtt=Number(selected.currentRoundTripTime);if(Number.isFinite(rtt)&&rtt>=0)summary.rttMs=Math.round(rtt*1000);}
+        return summary;
+      }catch{return empty;}
+    }
+    async function updateDiagnostics(role, pc, extra={}) {
+      const el=q(`[data-diagnostic="${role}"]`); if(!el||!pc)return;
+      const local=summarizeIce(pc.localDescription?.sdp), remote=summarizeIce(pc.remoteDescription?.sdp), pairStats=await candidatePairDiagnostics(pc);
+      const lines=[`${t('diagGather')}: ${stateLabel(pc.iceGatheringState)}`,`${t('diagLocal')}: ${local.count}${local.details?` · ${local.details}`:''}`];
+      if(pc.remoteDescription)lines.push(`${t('diagRemote')}: ${remote.count}${remote.details?` · ${remote.details}`:''}`);
+      lines.push(`${t('diagIce')}: ${stateLabel(pc.iceConnectionState)}`,`${t('diagPeer')}: ${stateLabel(pc.connectionState)}`);
+      if(pc.remoteDescription){
+        lines.push(`${t('diagPair')}: ${pairStats.selectedLabel||t('diagNoPair')}${pairStats.rttMs!==null?` · ${pairStats.rttMs} ms`:''}`);
+        if(pairStats.total>0)lines.push(`${t('diagPairTests')}: ${pairStats.total} · ${t('diagPairSuccess')} ${pairStats.succeeded} / ${t('diagPairChecking')} ${pairStats.checking} / ${t('diagPairFailedCount')} ${pairStats.failed}`);
+        if(pairStats.hasCounters)lines.push(`${t('diagConnectivity')}: ${t('diagSent')} ${pairStats.requestsSent} / ${t('diagRepliesReceived')} ${pairStats.responsesReceived} · ${t('diagReceived')} ${pairStats.requestsReceived} / ${t('diagRepliesSent')} ${pairStats.responsesSent}`);
+      }
+      let reasonKey='';
+      if(extra.note)lines.push(extra.note);
+      else if(local.count===0&&pc.iceGatheringState==='complete')lines.push(t('diagNoLocal'));
+      else if(pc.remoteDescription&&remote.count===0)lines.push(t('diagNoRemote'));
+      else if(pc.remoteDescription)reasonKey=classifyCandidatePairStats(pairStats,pc);
+      if(reasonKey)lines.push(`${t('diagLikelyCause')}: ${t(reasonKey)}`);
+      const failed=['failed','disconnected'].includes(pc.iceConnectionState)||['failed','disconnected'].includes(pc.connectionState);
+      el.hidden=false;el.classList.toggle('is-warning',Boolean(extra.warning)||(local.count===0&&pc.iceGatheringState==='complete')||(pc.remoteDescription&&remote.count===0)||failed);el.textContent=lines.join('\n');
+    }
 
     function iceError(code) { const e=new Error(code);e.code=code;return e; }
     function iceMessage(error) { if(error?.code==='ICE_GATHERING_ABORTED')return t('connectionClosed'); if(error?.code==='ICE_GATHERING_TIMEOUT')return t('iceTimeout'); if(error?.code==='ICE_NO_LOCAL_CANDIDATES')return t('noLocal'); if(error?.code==='ICE_NO_REMOTE_CANDIDATES')return t('noRemote'); return t('failed'); }
     function waitForIceComplete(role, pc) { if(pc.iceGatheringState==='complete')return Promise.resolve(); return new Promise((resolve,reject)=>{let done=false;const cleanup=()=>{clearTimeout(timer);['icegatheringstatechange','icecandidate','signalingstatechange','iceconnectionstatechange','connectionstatechange'].forEach(type=>pc.removeEventListener(type,check));};const finish=()=>{if(done)return;done=true;cleanup();resolve();};const fail=code=>{if(done)return;done=true;cleanup();reject(iceError(code));};const check=()=>{void updateDiagnostics(role,pc);if(pc.iceGatheringState==='complete')finish();else if(pc.signalingState==='closed')fail('ICE_GATHERING_ABORTED');else if(pc.iceConnectionState==='failed'||pc.connectionState==='failed')fail('ICE_PRECONNECT_FAILED');};const timer=setTimeout(()=>fail('ICE_GATHERING_TIMEOUT'),options.iceGatherTimeoutMs);['icegatheringstatechange','icecandidate','signalingstatechange','iceconnectionstatechange','connectionstatechange'].forEach(type=>pc.addEventListener(type,check));check();}); }
 
     function isCurrentPc(role, pc, attempt) { const bucket=state[role]; return !state.destroyed && bucket.pc===pc && bucket.attempt===attempt; }
+    function stopDiagnosticPolling(role) { const bucket=state[role];if(bucket.diagnosticTimer)clearInterval(bucket.diagnosticTimer);bucket.diagnosticTimer=0;bucket.diagnosticBusy=false; }
+    function startDiagnosticPolling(role,pc,attempt) { stopDiagnosticPolling(role);const bucket=state[role];bucket.diagnosticTimer=setInterval(()=>{if(!isCurrentPc(role,pc,attempt)){stopDiagnosticPolling(role);return;}if(bucket.diagnosticBusy)return;bucket.diagnosticBusy=true;Promise.resolve(updateDiagnostics(role,pc)).finally(()=>{if(state[role]===bucket)bucket.diagnosticBusy=false;});},1000); }
     function createPeer(role, attempt) {
       const pc=new RTCPeerConnection({iceServers:[]});
       state[role].pc=pc;
@@ -363,6 +413,7 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
       pc.addEventListener('connectionstatechange',()=>{if(!guard())return;void updateDiagnostics(role,pc);void handleConnectionState(role,pc.connectionState,pc,attempt);});
       const api={ role, pc, createDataChannel(label,init){const ch=pc.createDataChannel(label,init);bindChannel(role,ch,pc,attempt);return ch;}, bindChannel(ch){bindChannel(role,ch,pc,attempt);} };
       if(typeof options.onPeerCreated==='function')options.onPeerCreated(api);
+      startDiagnosticPolling(role,pc,attempt);
       return pc;
     }
     function bindChannel(role, channel, pc, attempt) {
@@ -379,7 +430,7 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
       const bucket=state[role];
       if(options.createDefaultChannel!==false&&(!bucket.channel||bucket.channel.readyState!=='open'))return;
       if(bucket.everConnected)return;
-      bucket.everConnected=true;state.connected=true;setStep(role,3);setStatus(role,t('connected'),'active');q(`[data-connected="${role}"]`).hidden=false;setCoach(role,role==='host'?'checking':'answer');q('[data-fullscreen]').hidden=true;emitState(role,'connected',{pc,channel:bucket.channel});if(typeof options.onConnected==='function')options.onConnected({role,pc,channel:bucket.channel});stopScanner();stopQrCycles();
+      bucket.everConnected=true;stopDiagnosticPolling(role);state.connected=true;setStep(role,3);setStatus(role,t('connected'),'active');q(`[data-connected="${role}"]`).hidden=false;setCoach(role,role==='host'?'checking':'answer');q('[data-fullscreen]').hidden=true;emitState(role,'connected',{pc,channel:bucket.channel});if(typeof options.onConnected==='function')options.onConnected({role,pc,channel:bucket.channel});stopScanner();stopQrCycles();
     }
     async function handleConnectionState(role, connectionState, pc, attempt) {
       if(!isCurrentPc(role,pc,attempt))return; const bucket=state[role];
@@ -387,13 +438,13 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
       if(connectionState==='disconnected'){setStatus(role,t('disconnected'),'warning');emitState(role,'disconnected',{pc});if(typeof options.onDisconnected==='function')options.onDisconnected({role,pc,temporary:true});return;}
       if(connectionState==='failed'){
         if(role==='join'&&!bucket.everConnected&&bucket.pendingOffer){void scheduleJoinRegeneration();return;}
-        setStatus(role,t('failed'),'warning');setCoach(role,'failed');void updateDiagnostics(role,pc,{warning:true});emitState(role,'failed',{pc});if(typeof options.onDisconnected==='function')options.onDisconnected({role,pc,temporary:false});return;
+        stopDiagnosticPolling(role);setStatus(role,t('failed'),'warning');setCoach(role,'failed');void updateDiagnostics(role,pc,{warning:true});emitState(role,'failed',{pc});if(typeof options.onDisconnected==='function')options.onDisconnected({role,pc,temporary:false});return;
       }
       if(connectionState==='closed'){setStatus(role,t('closed'));emitState(role,'closed',{pc});}
       else if(connectionState==='connecting')setStatus(role,t('checking'),'warning');
     }
 
-    function closePc(role) { const bucket=state[role], pc=bucket.pc; bucket.pc=null;bucket.channel=null;bucket.everConnected=false;bucket.failureHandling=false;if(pc){try{pc.getSenders?.().forEach(()=>{});}catch{}try{pc.close();}catch{}} }
+    function closePc(role) { const bucket=state[role], pc=bucket.pc; stopDiagnosticPolling(role);bucket.pc=null;bucket.channel=null;bucket.everConnected=false;bucket.failureHandling=false;if(pc){try{pc.getSenders?.().forEach(()=>{});}catch{}try{pc.close();}catch{}} }
     function resetHost({keepView=false}={}) { state.host.attempt+=1; closePc('host');state.host.offerCode='';state.host.answerApplied=false;state.connected=false;stopQr('host');stopScanner();q('[data-host-offer-code]').value='';q('[data-host-answer-input]').value='';q('[data-action="host-copy"]').disabled=true;q('[data-action="host-scan-answer"]').disabled=true;q('[data-action="host-apply-answer"]').disabled=true;q('[data-connected="host"]').hidden=true;q('[data-diagnostic="host"]').hidden=true;setStep('host',1);setCoach('host','offer');setStatus('host',t('stateNew'));renderQrPlaceholder('host',t('offerPlaceholder'));if(!keepView)showView('chooser'); }
     function resetJoin({preserveOffer=false,preserveRetry=false,keepView=false}={}) { state.join.attempt+=1; closePc('join');state.connected=false;stopQr('join');stopScanner();state.join.answerCode='';state.join.answerState=preserveOffer&&state.join.pendingOffer?'prepare':'idle';if(!preserveOffer)state.join.pendingOffer=null;if(!preserveRetry)state.join.autoRetryCount=0;if(state.join.autoRetryTimer)clearTimeout(state.join.autoRetryTimer);state.join.autoRetryTimer=0;q('[data-join-answer-code]').value='';q('[data-join-answer]').hidden=true;q('[data-connected="join"]').hidden=true;q('[data-diagnostic="join"]').hidden=true;q('[data-join-prepare]').hidden=!state.join.pendingOffer;setStep('join',state.join.pendingOffer?2:1);setCoach('join',state.join.pendingOffer?'prepare':'scan');setStatus('join',t('stateNew'));if(!keepView)showView('chooser'); }
     function resetAll() { resetHost({keepView:true});resetJoin({keepView:true});state.role='';showView('chooser'); }

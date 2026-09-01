@@ -255,9 +255,12 @@ The UI reports:
 - IPv4 / IPv6 / mDNS grouping
 - ICE connection state
 - PeerConnection state
-- selected candidate-pair summary
+- selected candidate-pair summary and RTT when available
+- candidate-pair attempt counts (succeeded / checking / failed)
+- connectivity-check counters from `getStats()` when available (requests sent, responses received, requests received, responses sent)
+- a likely-cause explanation on failure (no compatible pair, checks never starting, no reply, asymmetric connectivity, and related cases)
 
-It intentionally does not display the candidate IP addresses.
+Diagnostics refresh about once per second while ICE is checking and stop polling on connect, failure, or close. Candidate IP addresses are intentionally not displayed.
 
 ## Retry rules
 
