@@ -1,6 +1,6 @@
 # WebRTC QRペアリングコンポーネント
 
-`components/webrtc-qr-pairing.html` は、Browser Kitty / 単一HTMLアプリで **2台のブラウザーを完全サーバーレスにWebRTC接続する**ための再利用コンポーネントです。
+`components/webrtc-qr-pairing.html` は、単一HTMLアプリで **2台のブラウザーを完全サーバーレスにWebRTC接続する**ための再利用コンポーネントです。
 
 Wireless Sensor v1.0.0で実機調整した接続フローを汎用化しています。接続ロジックだけでなく、役割選択、QR表示、カメラスキャン、低解像度カメラ対策、ICE診断、再試行UIまで含みます。
 

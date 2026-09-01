@@ -1,6 +1,6 @@
 # WebRTC QR Pairing Component
 
-`components/webrtc-qr-pairing.html` is the reusable Browser Kitty / single-HTML pattern for **fully serverless WebRTC pairing between two browsers**.
+`components/webrtc-qr-pairing.html` is the reusable single-HTML pattern for **fully serverless WebRTC pairing between two browsers**.
 
 It generalizes the connection flow hardened in Wireless Sensor v1.0.0, including the UI: role selection, QR display, camera scanning, low-resolution camera handling, ICE diagnostics, cleanup, and retry behavior.
 

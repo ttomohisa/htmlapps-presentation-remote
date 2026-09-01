@@ -1,6 +1,6 @@
 # Third-party notices
 
-Browser Kitty Presentation Remote embeds the following pinned browser libraries at build time. They are not loaded from a CDN at runtime.
+Presentation Remote embeds the following pinned browser libraries at build time. They are not loaded from a CDN at runtime.
 
 ## qrcode-generator 1.4.4
 

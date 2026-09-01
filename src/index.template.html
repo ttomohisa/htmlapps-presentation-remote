@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#f5f5f2">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data: blob:; media-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'none'; object-src 'none'; frame-src blob:; base-uri 'none'; form-action 'none'">
-  <title>Browser Kitty Presentation Remote</title>
+  <title>Presentation Remote</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2316624F'/%3E%3Crect x='11' y='13' width='31' height='23' rx='3' fill='none' stroke='white' stroke-width='3.4'/%3E%3Cpath d='M20 47h13M26.5 36v11' stroke='white' stroke-width='3.4' stroke-linecap='round'/%3E%3Crect x='39' y='27' width='14' height='25' rx='3' fill='%2316624F' stroke='white' stroke-width='3.4'/%3E%3Ccircle cx='46' cy='47' r='1.5' fill='white'/%3E%3C/svg%3E">
   <style>
     :root{
@@ -152,7 +152,7 @@
   <div class="header-inner">
     <div class="brand">
       <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3" width="13" height="10" rx="1.5"/><path d="M6.5 18h5M9 13v5"/><rect x="14" y="9.5" width="7.5" height="12" rx="1.6"/><path d="M17.75 18.8h.01"/></svg></div>
-      <div class="brand-copy"><p class="brand-name"><span id="brandName">Browser Kitty Presentation Remote</span><span class="version-badge" id="versionBadge">v1.0.3</span></p><p class="brand-meta" data-i18n="brandMeta">PPTX / PDF · Phone remote · Direct WebRTC</p></div>
+      <div class="brand-copy"><p class="brand-name"><span id="brandName">Presentation Remote</span><span class="version-badge" id="versionBadge">v1.0.3</span></p><p class="brand-meta" data-i18n="brandMeta">PPTX / PDF · Phone remote · Direct WebRTC</p></div>
     </div>
     <div class="header-actions">
       <button class="language-button" id="languageButton" type="button" aria-label="Switch language">EN</button>
@@ -265,7 +265,7 @@
   </section>
 </main>
 
-<footer><span id="footerName">Browser Kitty Presentation Remote</span> · MIT License · <span data-i18n="footer">Single HTML · Local-first · Direct WebRTC</span></footer>
+<footer><span id="footerName">Presentation Remote</span> · MIT License · <span data-i18n="footer">Single HTML · Local-first · Direct WebRTC</span></footer>
 <input class="sr-only" id="fileInput" type="file" accept=".pptx,.pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/pdf">
 <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"><span id="toastText"></span><button class="toast-action" id="toastAction" type="button" hidden></button></div>
 
@@ -833,7 +833,8 @@ const outputFilename=null;
 
 function tr(k){return T[state.lang]?.[k]??T.en[k]??k}
 function applyI18n(){document.documentElement.lang=state.lang;$$('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(T[state.lang][k]!=null)el.textContent=T[state.lang][k]});$$('[data-i18n-title]').forEach(el=>{el.title=tr(el.dataset.i18nTitle)});$$('[data-i18n-aria-label]').forEach(el=>{el.setAttribute('aria-label',tr(el.dataset.i18nAriaLabel))});$$('[data-i18n-placeholder]').forEach(el=>{el.setAttribute('placeholder',tr(el.dataset.i18nPlaceholder))});$('#languageButton').textContent=state.lang==='ja'?'EN':'JA';$('#brandName').textContent=state.lang==='ja'?APP_CONFIG.nameJa:APP_CONFIG.name;$('#footerName').textContent=state.lang==='ja'?APP_CONFIG.nameJa:APP_CONFIG.name;$('#versionBadge').textContent=`v${APP_CONFIG.version}`;if(state.pairing)state.pairing.setLanguage(state.lang);updateUiText()}
-function setLanguage(lang){state.lang=lang==='en'?'en':'ja';try{localStorage.setItem(`${APP_CONFIG.slug}:language`,state.lang)}catch{}applyI18n();renderRemotePresenterView();renderConnectionRecoveryUi();renderWakeLockUi();renderSlideJumpDialog()}
+function refreshLoadedDocumentText(){if(state.phase!=='ready'||!state.file)return;$('#fileDetail').textContent=`${state.kind.toUpperCase()} · ${formatBytes(state.file.size)} · ${state.total} ${state.kind==='pdf'?tr('pages'):tr('slides')}`;renderCompatibility()}
+function setLanguage(lang){state.lang=lang==='en'?'en':'ja';try{localStorage.setItem(`${APP_CONFIG.slug}:language`,state.lang)}catch{}applyI18n();refreshLoadedDocumentText();renderRemotePresenterView();renderConnectionRecoveryUi();renderWakeLockUi();renderSlideJumpDialog()}
 function initLanguage(){let saved='';try{saved=localStorage.getItem(`${APP_CONFIG.slug}:language`)||''}catch{}state.lang=saved==='ja'||saved==='en'?saved:(navigator.language||'').toLowerCase().startsWith('ja')?'ja':'en'}
 function initRemotePreferences(){state.remoteUi.hapticsSupported=typeof navigator.vibrate==='function';let saved='',presenterSaved='',notesSize='';try{saved=localStorage.getItem(`${APP_CONFIG.slug}:remote-haptics`)||'';presenterSaved=localStorage.getItem(`${APP_CONFIG.slug}:presenter-view`)||'';notesSize=localStorage.getItem(`${APP_CONFIG.slug}:notes-font-size`)||''}catch{}state.remoteUi.haptics=state.remoteUi.hapticsSupported&&saved!=='0';state.remoteUi.presenterView=presenterSaved!=='0';const parsed=Number(notesSize);state.remoteUi.notesFontSize=Number.isFinite(parsed)?Math.max(11,Math.min(19,Math.round(parsed))):13;const toggle=$('#remoteHaptics');if(toggle){toggle.checked=state.remoteUi.haptics;toggle.disabled=!state.remoteUi.hapticsSupported}const presenterToggle=$('#remotePresenterToggle');if(presenterToggle)presenterToggle.checked=state.remoteUi.presenterView;const note=$('#remoteHapticsNote');if(note)note.textContent=state.remoteUi.hapticsSupported?tr('hapticsHint'):tr('hapticsUnsupported');renderNotesControls();renderWakeLockUi();initMotionPreferences()}
 function setRemoteHaptics(enabled){state.remoteUi.haptics=Boolean(enabled)&&state.remoteUi.hapticsSupported;try{localStorage.setItem(`${APP_CONFIG.slug}:remote-haptics`,state.remoteUi.haptics?'1':'0')}catch{}const toggle=$('#remoteHaptics');if(toggle)toggle.checked=state.remoteUi.haptics}
@@ -1006,7 +1007,9 @@ class EmbeddedPdfBinaryDataFactory{
  constructor({cMapUrl=null,standardFontDataUrl=null,wasmUrl=null}={}){this.cMapUrl=cMapUrl;this.standardFontDataUrl=standardFontDataUrl;this.wasmUrl=wasmUrl}
  async fetch({kind,filename}){const key=pdfEmbeddedKey(kind,filename);if(!key||!StandaloneAssets.has('pdfjs-dist',key))throw new Error(`Embedded PDF.js asset missing: ${kind}/${filename}`);return await StandaloneAssets.bytesAsync('pdfjs-dist',key)}
 }
+function installMapCompatibility(){if(typeof Map.prototype.getOrInsertComputed!=='function'){Object.defineProperty(Map.prototype,'getOrInsertComputed',{configurable:true,writable:true,value:function(key,callback){if(this.has(key))return this.get(key);const value=callback(key);this.set(key,value);return value}})}}
 async function ensurePdfJs(){
+ installMapCompatibility();
  if(state.pdfLib)return state.pdfLib;
  try{const lib=await StandaloneAssets.importModule('pdfjs-dist','pdf');if(!lib?.getDocument)throw new Error('PDFJS_INVALID');if(!state.pdfWorkerUrl)state.pdfWorkerUrl=await StandaloneAssets.blobUrlAsync('pdfjs-dist','worker');lib.GlobalWorkerOptions.workerSrc=state.pdfWorkerUrl;state.pdfLib=lib;return lib}catch(error){console.error('[PDF.js]',error);throw new Error('PDF_ENGINE_FAILED')}
 }

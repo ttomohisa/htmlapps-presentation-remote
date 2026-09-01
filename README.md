@@ -1,4 +1,4 @@
-# Browser Kitty Presentation Remote
+# Presentation Remote
 
 [![GitHub Pages](https://github.com/ttomohisa/htmlapps-presentation-remote/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/ttomohisa/htmlapps-presentation-remote/actions/workflows/deploy-pages.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)

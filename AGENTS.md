@@ -160,7 +160,7 @@ Update these when relevant:
 
 ## README screenshot policy
 
-Finished Browser Kitty tools should include a representative application screenshot
+Finished single-HTML apps should include a representative application screenshot
 unless a screenshot would not meaningfully explain the tool.
 
 - Store the primary screenshot at `assets/screenshot.png`.
@@ -176,7 +176,7 @@ unless a screenshot would not meaningfully explain the tool.
 
 ## Finished-app README shape
 
-When this template becomes a real Browser-Kitty tool, rewrite the README for end users instead of leaving template-development prose. Unless the product has a strong reason to differ, use this compact order:
+When this template becomes a real single-HTML app, rewrite the README for end users instead of leaving template-development prose. Unless the product has a strong reason to differ, use this compact order:
 
 1. App name + one-sentence purpose.
 2. Screenshot or short visual overview when useful.

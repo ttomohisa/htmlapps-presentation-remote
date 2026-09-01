@@ -1,7 +1,7 @@
 {
   "$schema": "./schemas/app-config.schema.json",
-  "name": "Browser Kitty Presentation Remote",
-  "nameJa": "Browser Kitty プレゼンテーションリモート",
+  "name": "Presentation Remote",
+  "nameJa": "プレゼンテーションリモート",
   "slug": "presentation-remote",
   "version": "1.0.3",
   "description": "Open a local PPTX or PDF and control it from a phone with direct WebRTC, slide previews, and speaker notes.",

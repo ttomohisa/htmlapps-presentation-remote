@@ -6,7 +6,7 @@
 
 ## 完全サーバーレスWebRTC QRペアリング
 
-`components/webrtc-qr-pairing.html` は、Browser Kitty系アプリで2台のブラウザーを、シグナリングサーバー / STUN / TURN / WebSocket / 外部APIなしで直接つなぐ場合の標準パターンです。低レベル関数だけではなく、接続UIと状態管理をまとめて持ちます。
+`components/webrtc-qr-pairing.html` は、単一HTMLアプリで2台のブラウザーを、シグナリングサーバー / STUN / TURN / WebSocket / 外部APIなしで直接つなぐ場合の標準パターンです。低レベル関数だけではなく、接続UIと状態管理をまとめて持ちます。
 
 含まれるもの：
 

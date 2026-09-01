@@ -1,8 +1,8 @@
-# APP_SPEC.md — Browser Kitty Presentation Remote
+# APP_SPEC.md — Presentation Remote
 
 ## 1. Product summary
 
-Browser Kitty Presentation Remote opens a local `.pptx` or `.pdf` on the presenting computer and lets another browser, typically a smartphone, control the presentation through a direct WebRTC DataChannel connection.
+Presentation Remote opens a local `.pptx` or `.pdf` on the presenting computer and lets another browser, typically a smartphone, control the presentation through a direct WebRTC DataChannel connection.
 
 The core product promise is:
 
@@ -16,7 +16,7 @@ The application is local-first and account-free. The selected deck stays on the 
 - One-file readable build: `dist/index.html`
 - One-file self-extracting build: `dist/index.self-extract.html`
 - Japanese and English in the same HTML.
-- Intended hosting: Browser Kitty / Azure Static Web Apps, while still supporting direct `file://` opening for the core presenter flow.
+- Intended hosting: GitHub Pages or another static host, while still supporting direct `file://` opening for the core presenter flow.
 
 ## 3. Primary flows
 
@@ -278,7 +278,7 @@ Remote phase:
 
 Desktop presenter layout:
 
-- Header uses Browser Kitty template styling.
+- Header uses single-HTML template styling.
 - After file load: left thumbnail rail, central slide stage, right compact control/status column.
 - The right column must remain compact and should not stretch to the entire document height.
 - Connection and presentation actions remain visible near the stage.

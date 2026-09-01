@@ -1,4 +1,4 @@
-Browser Kitty Presentation Remote
+Presentation Remote
 =================================
 
 1. Read README.ja.md for the app behavior and current limitations.

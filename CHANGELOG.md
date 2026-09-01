@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Remove the former umbrella-brand name from product UI, metadata, documentation, reusable-component guidance, development output, and release assets so this public repository stands on its own as Presentation Remote.
+- Refresh Japanese/English desktop and mobile screenshots with a brand-neutral demo deck, and remove unreferenced legacy introduction MP4 files.
+- Refresh loaded file/page/slide labels and compatibility text immediately when the UI language changes.
+- Add a small `Map.prototype.getOrInsertComputed` compatibility shim before loading embedded PDF.js so current PDF.js builds keep working in Chromium versions that do not yet provide that API.
+- Remove stale v1.0.1/v1.0.2 release-lock tests that intentionally fail against v1.0.3; current v1.0.3 and behavior-specific regression coverage remains.
+- Add repository cleanup regression coverage for product naming, generated HTML parity, PDF compatibility, language refresh, and screenshots.
+
 ## 1.0.3 - 2026-09-01
 
 - Treat the control DataChannel as the reusable pairing component's default channel, so application connection is not reported until both ICE and the control channel are ready.
@@ -222,11 +231,11 @@
 
 ## 0.1.0 - 2026-08-29
 
-- Initial Browser Kitty Presentation Remote implementation.
+- Initial Presentation Remote implementation.
 - Added local PPTX parsing/rendering for text, images, basic shapes, fills and placeholder geometry.
 - Added advisory PPTX compatibility checks for advanced/unsupported content.
 - Added local PDF presentation fallback through the browser PDF renderer.
 - Added desktop presenter layout with thumbnails, keyboard navigation, fullscreen, blank screen and timer.
-- Added the canonical fully serverless QR WebRTC pairing flow from the Browser Kitty template.
+- Added the canonical fully serverless QR WebRTC pairing flow from the single-HTML template.
 - Added separate reliable control and low-latency pointer DataChannels.
 - Added smartphone remote UI with next/previous, jump, blank screen and touch pointer controls.

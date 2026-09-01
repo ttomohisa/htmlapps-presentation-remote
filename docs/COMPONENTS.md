@@ -6,7 +6,7 @@ They are not automatically loaded by the builder. Copy or adapt the component in
 
 ## Fully serverless WebRTC QR pairing
 
-`components/webrtc-qr-pairing.html` is the canonical pattern when a Browser Kitty-style app needs to connect two browsers directly without a signaling server, STUN, TURN, WebSocket, or runtime API. It includes the UI and connection state machine rather than only a low-level helper.
+`components/webrtc-qr-pairing.html` is the canonical pattern when a single-HTML app needs to connect two browsers directly without a signaling server, STUN, TURN, WebSocket, or runtime API. It includes the UI and connection state machine rather than only a low-level helper.
 
 It provides:
 

@@ -263,7 +263,7 @@ try {
   $publicUrl = $tunnel.PublicUrl
 
   Write-Host ''
-  Write-Host 'Browser Kitty Presentation Remote - HTTPS development mode'
+  Write-Host 'Presentation Remote - HTTPS development mode'
   Write-Host '-----------------------------------------------------------'
   Write-Host "PC:    $LoopbackBase/?bkdev=host"
   Write-Host "Phone: $publicUrl/"
