@@ -2,11 +2,15 @@
 
 ## Unreleased
 
+## 1.0.4 - 2026-09-12
+
+- Fix PPTX text colors that could render as theme `lt1` white when paragraph `defRPr` or run colors should take precedence over a shape-level `fontRef` color in the pinned high-fidelity renderer.
+- Keep `@aiden0z/pptx-renderer` pinned at 1.2.4 and apply the compatibility correction only in memory before dynamic import; the embedded third-party asset remains unchanged and runtime network access remains disabled.
 - Remove the former umbrella-brand name from product UI, metadata, documentation, reusable-component guidance, development output, and release assets so this public repository stands on its own as Presentation Remote.
 - Refresh Japanese/English desktop and mobile screenshots with a brand-neutral demo deck, and remove unreferenced legacy introduction MP4 files.
 - Refresh loaded file/page/slide labels and compatibility text immediately when the UI language changes.
 - Add a small `Map.prototype.getOrInsertComputed` compatibility shim before loading embedded PDF.js so current PDF.js builds keep working in Chromium versions that do not yet provide that API.
-- Remove stale v1.0.1/v1.0.2 release-lock tests that intentionally fail against v1.0.3; current v1.0.3 and behavior-specific regression coverage remains.
+- Remove stale older release-lock tests and refresh current v1.0.4 / behavior-specific regression coverage.
 - Add repository cleanup regression coverage for product naming, generated HTML parity, PDF compatibility, language refresh, and screenshots.
 
 ## 1.0.3 - 2026-09-01

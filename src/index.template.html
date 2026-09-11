@@ -152,7 +152,7 @@
   <div class="header-inner">
     <div class="brand">
       <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3" width="13" height="10" rx="1.5"/><path d="M6.5 18h5M9 13v5"/><rect x="14" y="9.5" width="7.5" height="12" rx="1.6"/><path d="M17.75 18.8h.01"/></svg></div>
-      <div class="brand-copy"><p class="brand-name"><span id="brandName">Presentation Remote</span><span class="version-badge" id="versionBadge">v1.0.3</span></p><p class="brand-meta" data-i18n="brandMeta">PPTX / PDF · Phone remote · Direct WebRTC</p></div>
+      <div class="brand-copy"><p class="brand-name"><span id="brandName">Presentation Remote</span><span class="version-badge" id="versionBadge">v1.0.4</span></p><p class="brand-meta" data-i18n="brandMeta">PPTX / PDF · Phone remote · Direct WebRTC</p></div>
     </div>
     <div class="header-actions">
       <button class="language-button" id="languageButton" type="button" aria-label="Switch language">EN</button>
@@ -928,9 +928,27 @@ async function ensurePptxSvgLib(){
   const lib=await import(index);if(!lib?.PptxRenderer)throw new Error('PPTX_SVG_INVALID');state.pptxModuleUrls=Object.values(urls);state.pptxLib=lib;return lib
  }catch(error){Object.values(urls).forEach(url=>URL.revokeObjectURL(url));console.error('[pptx-svg]',error);throw new Error('PPTX_ENGINE_FAILED')}
 }
+function patchPptxRendererTextColorPrecedence(source){
+ // @aiden0z/pptx-renderer 1.2.4 can let a shape-level fontRef color
+ // override a resolved paragraph defRPr / run color. PowerPoint gives the
+ // resolved paragraph/run color precedence, so patch the pinned browser
+ // module in memory before importing it. Keep the patch exact and fail soft.
+ const oldExpr='i != null && i.fontRefColor ? Q = tt ? H.color : i.fontRefColor : i != null && i.cellTextColor && !tt ? Q = i.cellTextColor : Q = H.color';
+ const newExpr='i != null && i.fontRefColor ? Q = H.color ?? i.fontRefColor : i != null && i.cellTextColor && !tt ? Q = H.color ?? i.cellTextColor : Q = H.color';
+ if(!source.includes(oldExpr)){console.warn('[pptx-renderer] text-color compatibility patch was not applied');return source}
+ return source.replace(oldExpr,newExpr)
+}
 async function ensurePptxHiFiLib(){
  if(state.pptxHiFiLib)return state.pptxHiFiLib;
- try{const lib=await StandaloneAssets.importModule('pptx-renderer','browser');if(!lib?.parseZipLazyMedia||!lib?.buildPresentation||!lib?.renderSlide)throw new Error('PPTX_RENDERER_INVALID');state.pptxHiFiLib=lib;return lib}catch(error){console.error('[pptx-renderer]',error);throw new Error('PPTX_HIFI_ENGINE_FAILED')}
+ let moduleUrl='';
+ try{
+  const source=patchPptxRendererTextColorPrecedence(await StandaloneAssets.textAsync('pptx-renderer','browser'));
+  moduleUrl=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));
+  const lib=await import(moduleUrl);
+  if(!lib?.parseZipLazyMedia||!lib?.buildPresentation||!lib?.renderSlide)throw new Error('PPTX_RENDERER_INVALID');
+  state.pptxHiFiLib=lib;return lib
+ }catch(error){console.error('[pptx-renderer]',error);throw new Error('PPTX_HIFI_ENGINE_FAILED')}
+ finally{if(moduleUrl)URL.revokeObjectURL(moduleUrl)}
 }
 async function analyzePptxCompatibility(buffer,engine,slideCount){const compat=[];let pkg=null;try{pkg=new ZipPackage(buffer.slice(0));const presPath='ppt/presentation.xml';if(!pkg.has(presPath))return compat;const pres=xml(await pkg.text(presPath)),rels=await readRelationships(pkg,presPath),paths=[];const lst=localOne(pres,'sldIdLst');if(lst)for(const id of directChildrenByLocal(lst,['sldId'])){const rel=rels.get(relId(id));if(rel)paths.push(rel.target)}for(let i=0;i<Math.min(paths.length,slideCount);i++){if(!pkg.has(paths[i]))continue;const doc=xml(await pkg.text(paths[i])),root=doc.documentElement;const show=String(root?.getAttribute('show')||'').toLowerCase();if(localAll(doc,'timing').length||localAll(doc,'transition').length)compat.push({slide:i,type:'motion',label:'Animations / transitions are static'});if(localAll(doc,'audio').length||localAll(doc,'audioFile').length)compat.push({slide:i,type:'audio',label:'Audio is not played'});if(localAll(doc,'video').length||localAll(doc,'videoFile').length)compat.push({slide:i,type:'video',label:'Video is shown as a poster frame'});if(show==='0'||show==='false'||show==='off'||show==='no')compat.push({slide:i,type:'hidden',label:'Hidden slide'})}if(engine==='fallback'&&Array.from(pkg.entries.keys()).some(x=>x.startsWith('ppt/fonts/')))compat.push({slide:0,type:'fonts',label:'Embedded fonts may use device fallbacks'})}catch(error){console.warn('[PPTX compatibility scan]',error)}finally{pkg?.cleanup()}return compat}
 function sanitizeRenderedSvg(svg){for(const bad of Array.from(svg.querySelectorAll('script,iframe,object,embed')))bad.remove();for(const el of [svg,...svg.querySelectorAll('*')]){for(const attr of Array.from(el.attributes||[])){const name=attr.name.toLowerCase(),value=String(attr.value||'').trim();if(name.startsWith('on'))el.removeAttribute(attr.name);if((name==='href'||name==='xlink:href')&&/^(?:https?:|file:|javascript:)/i.test(value))el.removeAttribute(attr.name)}}}

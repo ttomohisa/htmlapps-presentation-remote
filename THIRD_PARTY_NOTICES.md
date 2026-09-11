@@ -25,6 +25,10 @@ Presentation Remote embeds the following pinned browser libraries at build time.
 
 The standalone browser ESM bundle is embedded at build time. Its browser bundle includes the renderer's required JSZip and ECharts runtime. Presentation Remote does not load it from a CDN at runtime and does not upload PPTX files to a conversion service.
 
+### Local text-color compatibility patch
+
+Presentation Remote v1.0.4 applies a narrow in-memory compatibility patch to the embedded `@aiden0z/pptx-renderer` 1.2.4 browser module before importing it. The patch changes text-color precedence so a resolved paragraph/run color can override the shape-level `fontRef` color, matching PowerPoint behavior for files where color is declared in paragraph `defRPr`. The original pinned third-party asset remains embedded unchanged; the patch is application code and is applied only at runtime in memory.
+
 The upstream browser bundle also contains `mtx-decompressor 1.4.2` (MPL-2.0) for embedded PowerPoint font handling. The corresponding source is available from the upstream project at https://github.com/ChristopherVR/mtx-decompressor/tree/v1.4.2 and remains governed by MPL-2.0. JSZip is distributed under MIT/GPLv3 terms and Apache ECharts under Apache-2.0; their upstream notices remain part of the pinned renderer distribution.
 
 ## pptx-svg 0.6.5

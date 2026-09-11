@@ -12,7 +12,7 @@ The application is local-first and account-free. The selected deck stays on the 
 
 ## 2. Release target
 
-- Version: `1.0.3`
+- Version: `1.0.4`
 - One-file readable build: `dist/index.html`
 - One-file self-extracting build: `dist/index.self-extract.html`
 - Japanese and English in the same HTML.
@@ -382,6 +382,12 @@ The production build embeds PDF.js packed CMaps and standard-font files from the
 - Legacy preview messages received on the control channel may still be parsed for backward compatibility, but new bulk preview requests/chunks MUST use the dedicated preview channel.
 - A dedicated preview-channel failure MUST NOT degrade remote navigation/control. Presenter View may become temporarily unavailable while the control channel remains fully responsive.
 
+
+## PPTX text-color compatibility (v1.0.4)
+
+The primary `@aiden0z/pptx-renderer` 1.2.4 browser module is kept pinned and embedded unchanged. Before dynamic import, Presentation Remote applies a narrow in-memory compatibility patch so a resolved paragraph/run text color can take precedence over a shape-level `fontRef` color. This matches PowerPoint behavior for presentations where text color is declared through paragraph `defRPr` and prevents explicit dark/brand text from rendering as theme `lt1` white.
+
+The patch is exact-match and fail-soft: if the pinned renderer source no longer contains the expected expression, the original source is imported and a warning is logged rather than applying a broad transformation.
 
 ## WebRTC channel isolation and recovery (v1.0.3)
 
