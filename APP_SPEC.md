@@ -12,7 +12,7 @@ The application is local-first and account-free. The selected deck stays on the 
 
 ## 2. Release target
 
-- Version: `1.0.4`
+- Version: `1.0.5`
 - One-file readable build: `dist/index.html`
 - One-file self-extracting build: `dist/index.self-extract.html`
 - Japanese and English in the same HTML.
@@ -382,6 +382,10 @@ The production build embeds PDF.js packed CMaps and standard-font files from the
 - Legacy preview messages received on the control channel may still be parsed for backward compatibility, but new bulk preview requests/chunks MUST use the dedicated preview channel.
 - A dedicated preview-channel failure MUST NOT degrade remote navigation/control. Presenter View may become temporarily unavailable while the control channel remains fully responsive.
 
+
+## PPTX chart initialization compatibility (v1.0.5)
+
+The primary PPTX renderer may initialize embedded charts asynchronously after `renderSlide()` returns. The rendered slide element must therefore be connected to the document and have a real layout size before the application awaits `handle.ready`. Presentation Remote stages the high-fidelity slide DOM in an off-screen, local host first, then waits for readiness, then moves the same element into the visible presentation frame. This applies to both the main presentation surface and thumbnails and does not introduce any network access.
 
 ## PPTX text-color compatibility (v1.0.4)
 

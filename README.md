@@ -23,6 +23,7 @@ GitHub Pages delivers the initial HTML. After it loads, PPTX/PDF parsing and pre
 - **Presenter View on the phone** — See the current slide, next slide, and PowerPoint speaker notes while keeping the main controls easy to reach.
 - **PowerPoint-oriented rendering** — Use `@aiden0z/pptx-renderer` as the primary PPTX renderer, with a compatibility fallback for decks the primary path cannot open.
 - **PowerPoint text-color compatibility** — Preserve explicit paragraph/run colors when a shape-level theme `fontRef` would otherwise override them in the pinned renderer.
+- **PowerPoint chart compatibility** — Stage high-fidelity slides in the document before renderer readiness so embedded charts can initialize in the main view and thumbnails.
 - **Built for live presentation use** — Includes reconnect guidance, Screen Wake Lock when available, touch/motion pointer modes, swipe navigation, and command feedback.
 - **Understand direct-connection failures** — When pairing fails, candidate-pair attempts and connectivity-check counters help distinguish client isolation, VPN/firewall blocking, and other reachability problems.
 - **Single-HTML distribution** — Runtime libraries are embedded at build time. No runtime CDN, analytics, telemetry, signaling server, STUN, or TURN is required.

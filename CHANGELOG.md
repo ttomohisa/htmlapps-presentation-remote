@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.0.5 - 2026-09-13
+
+- Fix high-fidelity PPTX charts not rendering in the main presentation surface and slide thumbnails.
+- Attach the rendered slide DOM to an off-screen local host before awaiting `@aiden0z/pptx-renderer` readiness, so ECharts can initialize against a connected element with a real layout size.
+- Keep Presenter View behavior unchanged; its high-fidelity preview path already attaches the render DOM before waiting for readiness.
+- Keep all PPTX rendering local and preserve the pinned `@aiden0z/pptx-renderer` 1.2.4 dependency.
+
 ## 1.0.4 - 2026-09-12
 
 - Fix PPTX text colors that could render as theme `lt1` white when paragraph `defRPr` or run colors should take precedence over a shape-level `fontRef` color in the pinned high-fidelity renderer.
