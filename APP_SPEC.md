@@ -305,6 +305,16 @@ Smartphone layout:
 - Remote next/previous controls are buttons, not gesture-only hit targets.
 - Do not rely on color alone for connected/disconnected state.
 
+### Navigation and recovery reliability
+
+- Each main-slide render captures its source, slide index and navigation generation. Results from earlier navigation or another deck must never replace the newest slide; stale renderer handles and canvases are released.
+- Deck cleanup detaches old resources synchronously before asynchronous PDF destruction. A late parse result is disposed without assigning it to the current deck. Replacement clears the actual blackout overlay as well as its state.
+- An open phone jump sheet preserves numeric input across periodic state refreshes. Opening it again or receiving a new deck revision resets the draft. Stable state updates do not rebuild the numbered button grid or disturb keyboard focus.
+- Direct navigation accepts only a whole slide number within the known deck range (1–999 when unknown). Input errors are localized and exposed through native field validation; host commands are independently checked.
+- Presentation hotkeys do not intercept an open dialog, an interactive/editable target, a handled event, a modified key or IME composition.
+- When visible current/next previews or current-slide notes fail, a localized retry button requests failed content through the existing open preview channel. It retains successful caches and unrelated errors. It is disabled while visible work is pending, while reconnecting/disconnected, or when the preview channel is unavailable.
+- Explicit retry clears only failed visible entries, discards their partial assemblies and starts a fresh finite attempt. Partial success does not extend the 30-second deadline. Late packets from an earlier attempt cannot overwrite retry results. No protocol, permission, persistence or networking service is added.
+
 ## 15. Privacy and CSP
 
 No runtime CDN, analytics, telemetry, external font, API request, or hidden network dependency.

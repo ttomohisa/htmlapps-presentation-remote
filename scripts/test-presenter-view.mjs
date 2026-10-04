@@ -45,7 +45,7 @@ must('async function extractPptxSpeakerNotes', 'speaker-note extraction');
 must('/\\/notesSlide$/i', 'notesSlide relationship lookup');
 must("toLowerCase()!=='body'", 'body placeholder filter');
 must("pdfNoSpeakerNotes:'PDFにはPowerPointの発表者ノートはありません。'", 'PDF note explanation');
-mustMatch(/if\(!state\.remoteUi\.presenterView\|\|!state\.remote\.connected\|\|state\.remote\.reconnecting\)return/, 'Presenter View OFF or disconnected remote stops preview requests');
+mustMatch(/if\(!state\.remoteUi\.presenterView\|\|!state\.remote\.connected\|\|state\.remote\.reconnecting\|\|state\.remote\.lost\)return/, 'Presenter View OFF or disconnected remote stops preview requests');
 if (/scheduleRemotePreviewRequest\(force=false\)\{[^\n]*state\.role/.test(html)) throw new Error('Remote preview scheduling must not depend on global state.role');
 mustMatch(/const ch=previewTransportChannel\(\);if\(!ch\)\{state\.remoteUi\.previewRequestTimer=setTimeout\(\(\)=>scheduleRemotePreviewRequest\(true\),1000\);return\}/, 'missing preview channel retries instead of waiting forever');
 mustMatch(/lastPreviewRequestKey=key[\s\S]*?const ch=previewTransportChannel\(\)/, 'preview attempt key is committed before a missing-channel retry');
