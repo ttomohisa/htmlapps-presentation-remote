@@ -20,11 +20,11 @@ const renderEnd = html.indexOf('function buildThumbs', renderStart);
 assert.ok(renderStart >= 0 && renderEnd > renderStart, 'renderCurrent missing');
 const renderCurrent = html.slice(renderStart, renderEnd);
 const appendPos = renderCurrent.indexOf('surface.append(view)');
-const settlePos = renderCurrent.indexOf('await state.deck.settleAttachedMain?.(view,state.current)');
+const settlePos = renderCurrent.indexOf('await deck.settleAttachedMain?.(view,index)');
 assert.ok(appendPos >= 0 && settlePos > appendPos, 'main PPTX text must settle only after the frame is attached');
-assert.ok(renderCurrent.includes('const firstConnectedPass=Boolean(state.deck.needsInitialConnectedPass?.())'), 'first connected pass detection missing');
-assert.ok(renderCurrent.includes('view=await state.deck.render(state.current,false)'), 'first connected pass is not followed by a fresh render');
-assert.ok(renderCurrent.includes('state.deck.finishInitialConnectedPass?.()'), 'initial connected pass is not marked complete');
+assert.ok(renderCurrent.includes('const firstConnectedPass=Boolean(deck.needsInitialConnectedPass?.())'), 'first connected pass detection missing');
+assert.ok(renderCurrent.includes('view=await deck.render(index,false)'), 'first connected pass is not followed by a fresh render');
+assert.ok(renderCurrent.includes('deck.finishInitialConnectedPass?.()'), 'initial connected pass is not marked complete');
 assert.ok(renderCurrent.includes("view.style.visibility='hidden'"), 'stabilization pass should not flash incomplete text');
 
 function takeFunction(name, nextName) {

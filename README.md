@@ -60,6 +60,7 @@ The build uses Windows PowerShell and the built-in `tar.exe`. Node.js and Python
 Presenter View is enabled by default on the phone.
 
 - The current slide is shown larger than the next slide.
+- If a preview or notes fail, use **Retry previews / notes**. Successful content is kept; retry waits for pending transfers and an active connection.
 - PowerPoint speaker notes can be expanded or collapsed.
 - Note text size can be adjusted from 11–19 px and is remembered on that phone.
 - Long notes scroll inside the note area instead of pushing the main controls off-screen.
@@ -110,6 +111,10 @@ The repository includes a workflow that builds the embedded standalone HTML and 
 Each build runs `scripts/check-repository.ps1`, rebuilds the single HTML from pinned dependencies, verifies the repository/standalone contracts, and then publishes the result.
 
 ## Development and build layout
+
+Run `node scripts/test-all.mjs` for all regression suites (Node.js 18 or newer). Run `scripts/check-repository.ps1` separately for the full dependency build and both standalone variants; that PowerShell check does not execute the Node tests.
+
+Direct slide entry accepts whole numbers within the deck range. The phone keeps an edited jump number during host state refreshes. Presentation keyboard shortcuts pause while a dialog or interactive control is in use.
 
 ```text
 .

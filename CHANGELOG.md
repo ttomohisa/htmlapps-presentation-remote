@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Keep only the newest PDF/PPTX navigation render and dispose stale views; prevent late source cleanup/parsing from clearing or replacing a newer deck.
+- Reset the visible black-screen overlay when replacing a presentation.
+- Preserve an open phone slide-jump draft across periodic host updates, validate whole in-range slide numbers on both sides, and keep presentation shortcuts out of dialogs, editable controls, modified keys and IME composition.
+- Add Japanese/English retry for failed current/next previews and speaker notes. Keep successful caches and use only the existing dedicated preview channel, with a finite 30-second unresolved deadline.
+- Add behavioral navigation/recovery regressions and a Node aggregate runner. Refresh five obsolete baseline assertions to the current release/channel contract while retaining their privacy, layout, recovery and channel-isolation checks.
+
 ## 1.0.5 - 2026-09-13
 
 - Fix high-fidelity PPTX charts not rendering in the main presentation surface and slide thumbnails.

@@ -7,7 +7,10 @@ const has=(needle,label=needle)=>must(html.includes(needle),label);
 
 has("function previewTransportChannel(){const dedicated=state.channels.preview;if(dedicated?.readyState==='open')return dedicated;return null}",'preview transport uses only dedicated preview channel');
 must(!/function previewTransportChannel\(\)\{[^}]*state\.channels\.control/.test(html),'control channel is not selected for bulk previews');
-has("rememberChannel(role,createDataChannel(CONTROL_CHANNEL,{ordered:true}))",'host registers control channel immediately');
+// v1.0.3 moved reliable control creation into the canonical pairing component.
+has("createDefaultChannel:true,dataChannelLabel:CONTROL_CHANNEL,dataChannelInit:{ordered:true}",'host creates reliable control through pairing component');
+has("onChannel({role,channel}){rememberChannel(role,channel)}",'created control channel is registered by callback');
+must(component.includes("bindChannel('host',ch,pc,attempt)"), 'component binds newly created control channel');
 has("rememberChannel(role,createDataChannel(PREVIEW_CHANNEL,{ordered:true}))",'host registers preview channel immediately');
 has('function markTransportLongDisconnected(role)','long-disconnect state is separate from hard failure');
 const longBlock=html.match(/function markTransportLongDisconnected\(role\)\{[^\n]+\}/)?.[0]||'';
