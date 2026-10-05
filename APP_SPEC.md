@@ -149,6 +149,7 @@ Phone:
 - Motion pointer mode using Device Orientation
 - Pointer recenter / motion calibration
 - Motion Freeze / Resume, sensitivity, dead-zone and stabilization controls
+- **More → Swipe navigation**: turn horizontal navigation gestures on/off without changing buttons or direct slide selection
 
 ## 9. Pointer
 
@@ -339,6 +340,7 @@ Do not persist:
 - Slide text/content
 - WebRTC SDP/candidates/session data
 - Presentation timer state
+- Swipe navigation choice: in-memory only, on for each new page load, retained across reconnects, language changes and deck replacement
 
 ## 17. Acceptance criteria
 
@@ -430,7 +432,9 @@ The phone surface is optimized for use while speaking rather than for configurat
 
 - **Next** is the largest primary target; **Previous** remains available but visually smaller.
 - Horizontal swipes over the navigation area are supported. A gesture must exceed both a horizontal distance threshold and a horizontal-vs-vertical ratio before it becomes navigation.
-- A recognized swipe suppresses the synthetic/underlying button click to avoid double navigation.
+- **Swipe navigation** is ON for each new page load and can be disabled in **More**. The localized native checkbox remains keyboard-operable and usable while disconnected. This choice stays in page memory across reconnection, language changes and deck replacement; it is never stored or sent to the peer.
+- Turning swipe navigation off leaves previous/next buttons and direct slide selection available. Any setting change during a gesture cancels that gesture, even when switched off and back on before pointer release.
+- A drag over 12 px suppresses the synthetic/underlying button click for 360 ms, including when swipe navigation is off or its setting changed mid-gesture. Existing 52 px horizontal distance, 1.25 horizontal/vertical ratio and 800 ms duration limits remain unchanged.
 - Black screen, pointer and **More** are persistent secondary controls. On narrow portrait phones they remain in the lower action bar; on short landscape phones they move to a right-side vertical rail.
 - The pointer panel is hidden unless the pointer is enabled, and exposes Touch / Motion mode tabs.
 - Touch mode keeps the drag touchpad and one-tap recenter action.
@@ -438,7 +442,7 @@ The phone surface is optimized for use while speaking rather than for configurat
 - The slide counter itself is a direct-navigation affordance. Tapping it opens a modal slide-move sheet; the same action also remains available behind **More**.
 - For known deck lengths up to 120 slides, the sheet exposes all slide numbers. For larger decks it exposes compact first/current/last neighborhoods plus direct numeric entry instead of rendering hundreds of buttons. It does not require sending extra slide previews.
 - Timer reset and disconnect stay behind **More** so they do not compete with the main navigation targets.
-- Previous is disabled on the first slide. Next is disabled on the last slide when the total slide count is known.
+- Previous is disabled on the first slide. Next is disabled on the last slide when the total slide count is known. `sendCommand` independently rejects these boundary commands before command sequence allocation, debounce updates, transport send or success feedback/haptics. Known empty and one-slide decks reject both directions; unknown totals still allow Next. Rejected commands never change the host-owned remote index.
 - Presenter View is ON by default and shows the current slide larger than the next slide. Speaker notes are collapsed by default.
 - Speaker-note text size is adjustable from 11 to 19 px, persists only in local browser storage, and long notes scroll inside the notes panel instead of growing the whole remote indefinitely. On slide change, the notes panel returns to the top.
 - Presenter View may be disabled from **More**; when disabled, preview requests stop and the navigation surface expands back to the simple remote layout.
