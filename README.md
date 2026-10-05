@@ -52,8 +52,9 @@ The build uses Windows PowerShell and the built-in `tar.exe`. Node.js and Python
 3. To connect a phone, choose **Connect phone** on the computer.
 4. On the phone, open the app and choose **Use as remote**, then scan the connection QR shown by the computer.
 5. The phone displays a response QR. Scan that QR with the computer to complete the direct WebRTC connection.
-6. Use the large **Next** button, **Previous**, or a horizontal swipe to move through the presentation. Presenter View shows the current/next slide and speaker notes.
+6. Use the large **Next** button, **Previous**, or a horizontal swipe to move through the presentation. Turn off **Swipe navigation** under **More** to use buttons without accidental swipe navigation. Presenter View shows the current/next slide and speaker notes.
 7. Tap the slide counter to jump directly to another slide. Use **More** for Presenter View, vibration feedback, timer, and reconnect/disconnect actions.
+   Swipe navigation starts on when the page loads. Its choice stays through reconnection, language changes and deck replacement, and resets to on after reloading. It is not saved or sent to the paired computer.
 
 ### Presenter View
 

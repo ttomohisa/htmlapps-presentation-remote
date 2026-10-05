@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add a Japanese/English **More → Swipe navigation** toggle, on by default and kept only in page memory. Disabling swipes preserves buttons, slide jumps and drag-click suppression; changing the setting cancels an in-progress swipe.
+- Reject previous/next commands at known deck boundaries before transport sequence/debounce changes or success feedback. Unknown-total Next remains available, and host state stays authoritative.
+- Cover the swipe toggle, page-local lifetime, boundary handling, interrupted gestures and transport/feedback invariants with 26 network-free behavioral regressions.
+
 - Keep only the newest PDF/PPTX navigation render and dispose stale views; prevent late source cleanup/parsing from clearing or replacing a newer deck.
 - Reset the visible black-screen overlay when replacing a presentation.
 - Preserve an open phone slide-jump draft across periodic host updates, validate whole in-range slide numbers on both sides, and keep presentation shortcuts out of dialogs, editable controls, modified keys and IME composition.
