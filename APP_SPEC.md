@@ -12,7 +12,7 @@ The application is local-first and account-free. The selected deck stays on the 
 
 ## 2. Release target
 
-- Version: `1.0.5`
+- Version: `1.0.6`
 - One-file readable build: `dist/index.html`
 - One-file self-extracting build: `dist/index.self-extract.html`
 - Japanese and English in the same HTML.
@@ -299,6 +299,7 @@ Smartphone layout:
 ## 14. Accessibility
 
 - All controls have accessible names.
+- The header language button shows the target language as `EN` / `JA`, with its accessible name and tooltip localized to the current UI language. Help and Close also have localized names/tooltips. The no-deck-upload badge and direct control/preview/speaker-note transfer disclosure remain unchanged.
 - Visible keyboard focus.
 - Dialog focus is restored when closed.
 - Status changes use polite live regions.
