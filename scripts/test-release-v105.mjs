@@ -11,13 +11,13 @@ const spec = read('APP_SPEC.md');
 const changelog = read('CHANGELOG.md');
 const must = (cond,label)=>{ if(!cond) throw new Error(`Release v1.0.5 invariant failed: ${label}`); };
 
-must(app.version === '1.0.5','app.config version');
-must(html.includes('id="versionBadge">v1.0.5'),'visible version badge');
+must(/^\d+\.\d+\.\d+$/.test(app.version),'app.config semantic version');
+must(html.includes(`id="versionBadge">v${app.version}`),'visible version badge matches config');
 must(readme.includes('## Features'),'English README feature section');
 must(readmeJa.includes('## 主な機能'),'Japanese README feature section');
 must(readme.includes('## Privacy and networking'),'English README privacy section');
 must(readmeJa.includes('## プライバシーと通信'),'Japanese README privacy section');
-must(spec.includes('- Version: `1.0.5`'),'APP_SPEC release target');
+must(spec.includes('- Version: `' + app.version + '`'),'APP_SPEC release target matches config');
 must(changelog.includes('## 1.0.5 - 2026-09-13'),'CHANGELOG 1.0.5 entry');
 
 for (const file of ['assets/favicon.svg','assets/screenshot.png','assets/screenshot-en.png','assets/screenshot-mobile.png']) {

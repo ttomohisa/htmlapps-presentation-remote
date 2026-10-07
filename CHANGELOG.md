@@ -12,6 +12,11 @@
 - Add Japanese/English retry for failed current/next previews and speaker notes. Keep successful caches and use only the existing dedicated preview channel, with a finite 30-second unresolved deadline.
 - Add behavioral navigation/recovery regressions and a Node aggregate runner. Refresh five obsolete baseline assertions to the current release/channel contract while retaining their privacy, layout, recovery and channel-isolation checks.
 
+## 1.0.6 - 2026-10-07
+
+- Normalize the header language target to EN / JA and localize its accessible name and tooltip, plus the Help close tooltip.
+- Preserve the no-deck-upload badge and direct control, slide-preview and speaker-note peer-transfer disclosures. Add network-free header regression coverage.
+
 ## 1.0.5 - 2026-09-13
 
 - Fix high-fidelity PPTX charts not rendering in the main presentation surface and slide thumbnails.

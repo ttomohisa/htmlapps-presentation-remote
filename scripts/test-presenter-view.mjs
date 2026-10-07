@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const html = fs.readFileSync('src/index.template.html', 'utf8');
+const app = JSON.parse(fs.readFileSync('app.config.json', 'utf8'));
 const must = (needle, label = needle) => {
   if (!html.includes(needle)) throw new Error(`Missing Presenter View invariant: ${label}`);
 };
@@ -105,7 +106,7 @@ must('hostInflight:new Map()', 'shared in-flight slide preview generation');
 mustMatch(/const token=state\.preview\.hostToken,indexes=/, 'preview retry does not invalidate in-flight generation');
 if (/respondPresenterRequest\([\s\S]*?\+\+state\.preview\.hostToken/.test(html)) throw new Error('Presenter preview requests must not cancel in-flight preview generation');
 mustMatch(/channel\.label===PREVIEW_CHANNEL&&channel\.readyState===['"]open['"]&&role===['"]join['"][\s\S]*?scheduleRemotePreviewRequest\(true\)/, 'already-open preview channel triggers request');
-must('id="versionBadge">v1.0.5', 'visible v1.0.5 badge');
+must(`id="versionBadge">v${app.version}`, 'visible version badge matches config');
 must('@media(max-height:560px) and (orientation:landscape) and (max-width:1000px)', 'short landscape layout');
 must('.remote-mode .remote-tools{left:auto;right:7px;', 'landscape side action rail');
 
