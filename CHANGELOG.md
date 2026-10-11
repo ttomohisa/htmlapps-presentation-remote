@@ -12,6 +12,12 @@
 - Add Japanese/English retry for failed current/next previews and speaker notes. Keep successful caches and use only the existing dedicated preview channel, with a finite 30-second unresolved deadline.
 - Add behavioral navigation/recovery regressions and a Node aggregate runner. Refresh five obsolete baseline assertions to the current release/channel contract while retaining their privacy, layout, recovery and channel-isolation checks.
 
+## 1.0.7 - 2026-10-11
+
+- Keep the Help heading and Close button visible on short screens by allocating a viewport-bounded shell and scrolling only the Help body.
+- Lock document/background scrolling while a native modal is open; preserve native Close, Escape and backdrop dismissal and the existing pairing, slide-jump and development dialog layouts.
+- Add Japanese/English Help guidance and network-free Help layout/handler regressions to the existing Node aggregate runner. Preserve the shield badge and direct WebRTC privacy disclosures.
+
 ## 1.0.6 - 2026-10-07
 
 - Normalize the header language target to EN / JA and localize its accessible name and tooltip, plus the Help close tooltip.
