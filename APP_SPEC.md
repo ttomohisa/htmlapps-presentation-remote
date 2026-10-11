@@ -12,7 +12,7 @@ The application is local-first and account-free. The selected deck stays on the 
 
 ## 2. Release target
 
-- Version: `1.0.6`
+- Version: `1.0.7`
 - One-file readable build: `dist/index.html`
 - One-file self-extracting build: `dist/index.self-extract.html`
 - Japanese and English in the same HTML.
@@ -295,6 +295,13 @@ Smartphone layout:
 - On short landscape screens, the tool bar moves to a compact right-side vertical rail so the preview area and navigation stay within one viewport.
 - Pointer touchpad is adjacent to pointer controls when the pointer is enabled.
 - Safe-area padding is required.
+
+Help dialog:
+
+- The native Help modal has a viewport-bounded height with dynamic viewport and safe-area support. Its heading and Close button remain visible while only the Help body scrolls.
+- The document root and body do not scroll while any native modal is open. Dismissal removes that CSS-only lock without changing page scroll position or dialog handlers.
+- Close, Escape and backdrop dismissal remain available. The closed Help dialog stays hidden, and pairing, slide-jump and development dialogs keep their existing layouts and behavior.
+- Verify Japanese and English at desktop, narrow-phone and short 393×252 viewports: read the final Help item, keep Close visible, reject outside scroll movement, then dismiss and reopen; normal page scrolling must resume after dismissal.
 
 ## 14. Accessibility
 

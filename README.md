@@ -56,6 +56,10 @@ The build uses Windows PowerShell and the built-in `tar.exe`. Node.js and Python
 7. Tap the slide counter to jump directly to another slide. Use **More** for Presenter View, vibration feedback, timer, and reconnect/disconnect actions.
    Swipe navigation starts on when the page loads. Its choice stays through reconnection, language changes and deck replacement, and resets to on after reloading. It is not saved or sent to the paired computer.
 
+### Help on small screens
+
+Open **How to use & notes** from the header. Scroll within the Help body to read to the end; the heading and **Close** stay visible even on short screens. The page behind the dialog stays still. Close it with **Close**, **Esc**, or a click outside the dialog to return to the page.
+
 ### Presenter View
 
 Presenter View is enabled by default on the phone.
