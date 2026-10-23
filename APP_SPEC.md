@@ -471,3 +471,7 @@ The phone surface is optimized for use while speaking rather than for configurat
 - After the grace window expires, the phone shows a disconnected/reconnect UI, but the existing PeerConnection and DataChannel references are preserved until the transport actually becomes `failed` or `closed`, allowing late ICE recovery without forcing a new QR exchange.
 - Pointer packets may be dropped when the unreliable pointer DataChannel buffer is backed up; stale pointer motion must not delay control commands.
 - The smartphone requests Screen Wake Lock while connected when supported and re-acquires it after visibility restoration.
+
+## Smartphone informational footer
+
+Hide only the informational footer at the existing smartphone layout query `(max-width:720px), (max-height:560px) and (orientation:landscape) and (max-width:1000px)`; preserve desktop visibility and functional controls. Preserve the distinct no-deck-upload and direct WebRTC explanations; do not replace them with a wholly-local claim.
