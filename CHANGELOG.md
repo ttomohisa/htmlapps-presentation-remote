@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Hide only the informational footer at the existing smartphone layout query `(max-width:720px), (max-height:560px) and (orientation:landscape) and (max-width:1000px)`; preserve desktop visibility and functional controls. Preserve the distinct no-deck-upload and direct WebRTC explanations; do not replace them with a wholly-local claim.
+
+
 - Add a Japanese/English **More → Swipe navigation** toggle, on by default and kept only in page memory. Disabling swipes preserves buttons, slide jumps and drag-click suppression; changing the setting cancels an in-progress swipe.
 - Reject previous/next commands at known deck boundaries before transport sequence/debounce changes or success feedback. Unknown-total Next remains available, and host state stays authoritative.
 - Cover the swipe toggle, page-local lifetime, boundary handling, interrupted gestures and transport/feedback invariants with 26 network-free behavioral regressions.
