@@ -56,6 +56,13 @@ The build uses Windows PowerShell and the built-in `tar.exe`. Node.js and Python
 7. Tap the slide counter to jump directly to another slide. Use **More** for Presenter View, vibration feedback, timer, and reconnect/disconnect actions.
    Swipe navigation starts on when the page loads. Its choice stays through reconnection, language changes and deck replacement, and resets to on after reloading. It is not saved or sent to the paired computer.
 
+### Confirmed controls and presentation timer (v1.1.0)
+
+- The phone shows **Sending**, then **Applied on PC** only after PC processing/rendering completes. **Could not confirm reflection** means no matching success was received within 10 seconds, the connection changed, or the operation failed. It is not proof that nothing happened. Check the PC before repeating; commands are never automatically resent. Use the latest version on both devices.
+- **Start presentation** enters fullscreen only. Use **Start talk** to begin timing, then **Pause**, **Resume** or **Reset**. The phone has these controls under **More**.
+- Choose unlimited, a preset, or a custom whole 1–180 minutes, then **Apply**. The PC synchronizes elapsed/remaining/overtime to the phone. Reaching zero does not stop slides. A deck change resets elapsed time while retaining the duration; a page reload resets timer state.
+- The camera's white QR guide stays centered and square in portrait and landscape; it does not crop the decoder input or distort the video.
+
 ### Help
 
 Open **How to use & notes** from the header. Close it with **Close**, **Esc**, or a click outside the dialog to return to the page.
@@ -202,3 +209,8 @@ Bug reports and feature proposals are welcome through GitHub Issues. See [CONTRI
 Copyright © 2026 ttomohisa
 
 Licensed under the [MIT License](LICENSE).
+
+
+### v1.1.0 browser regression
+
+With Playwright installed, run `node scripts/v110.browser.cjs` after building. It creates a synthetic three-page PDF, pairs two real Chromium contexts over WebRTC, checks command results and timer controls (including a real one-minute expiry), and measures the square guide using Chromium's synthetic camera. `test-results/v110/` contains screenshots and results. No user document or actual camera is used. The PR preview workflow runs this check.

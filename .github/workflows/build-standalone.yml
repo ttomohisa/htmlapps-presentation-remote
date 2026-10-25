@@ -27,6 +27,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Set up Node for behavioral regressions
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 24
+
+      - name: Run behavioral regressions
+        run: node scripts/test-all.mjs
+
       - name: Build and verify standalone HTML
         shell: pwsh
         run: ./scripts/check-repository.ps1

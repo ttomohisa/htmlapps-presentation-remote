@@ -78,12 +78,12 @@ test('actual Help handlers support repeated open, Close and backdrop dismissal',
  assert.equal(dialog.events.cancel,undefined,'native Escape cancellation is not intercepted by Help');
 });
 
-test('Japanese and English Help explain scrolling without changing privacy claims',()=>{
+test('Japanese and English Help explain dismissal without implementation commentary or privacy changes',()=>{
  const begin=source.indexOf('const T={'),end=source.indexOf('const $=',begin);
  const translations=vm.runInNewContext(source.slice(begin,end)+'\nT');
- assert.match(translations.ja.helpDialogScroll||'',/本文.*スクロール/);
+ assert.match(translations.ja.helpDialogScroll||'',/Esc/);
  assert.match(translations.ja.helpDialogScroll||'',/閉じる/);
- assert.match(translations.en.helpDialogScroll||'',/scroll.*Help body/i);
+ assert.match(translations.en.helpDialogScroll||'',/Esc/);
  assert.match(translations.en.helpDialogScroll||'',/Close/);
  const section=source.slice(source.indexOf('<!-- APP:HELP:BEGIN -->'),source.indexOf('<!-- APP:HELP:END -->'));
  assert.match(section,/data-i18n="helpDialogScroll"/,'new behavior is in the maintained Help section');

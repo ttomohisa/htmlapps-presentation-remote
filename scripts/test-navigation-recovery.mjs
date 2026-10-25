@@ -43,15 +43,15 @@ test('stale PPTX result is released and never settles or changes the current sur
 });
 test('new deck clears the actual blackout overlay',async()=>{
  const elements=new Map([['#blankOverlay',{hidden:false}]]),$=s=>{if(!elements.has(s))elements.set(s,element());return elements.get(s)};
- const state={generation:1,deckRevision:1,preview:{hostToken:0,hostCache:new Map(),hostInflight:new Map()},blank:true,pointerVisible:true};
+ const state={timer:{status:'running',elapsedMs:50,startedAt:0,durationMs:600000},generation:1,deckRevision:1,preview:{hostToken:0,hostCache:new Map(),hostInflight:new Map()},blank:true,pointerVisible:true};
  const c=context(['openFile'],{state,$,MAX_FILE_BYTES:150*1024*1024,cleanupDeck:async()=>{},loadPdf:async()=>({numPages:2}),performance:{now:()=>1},formatBytes:()=>'',tr:x=>x,renderCompatibility(){},renderCurrent:async()=>{},buildThumbs(){},updateUiText(){},syncState(){},showToast(){},console});
- await c.openFile({name:'replacement.pdf',size:100});assert.equal(state.blank,false);assert.equal($('#blankOverlay').hidden,true);
+ await c.openFile({name:'replacement.pdf',size:100});assert.equal(state.blank,false);assert.equal($('#blankOverlay').hidden,true);assert.equal(state.phase,'ready');assert.equal(state.timer.status,'idle');assert.equal(state.timer.elapsedMs,0);assert.equal(state.timer.durationMs,600000);
 });
 test('late source parsing disposes the old deck without replacing the newer deck',async()=>{
  const elements=new Map(),$=s=>{if(!elements.has(s))elements.set(s,element());return elements.get(s)},a=deferred(),b=deferred();let disposed=0;
- const state={generation:0,deckRevision:0,preview:{hostToken:0,hostCache:new Map(),hostInflight:new Map()}};
+ const state={timer:{status:'idle',elapsedMs:0,startedAt:0,durationMs:0},generation:0,deckRevision:0,preview:{hostToken:0,hostCache:new Map(),hostInflight:new Map()}};
  const c=context(['openFile'],{state,$,MAX_FILE_BYTES:1e9,cleanupDeck:async()=>{},loadPptx:file=>file.name==='a.pptx'?a.promise:b.promise,performance:{now:()=>1},formatBytes:()=>'',tr:x=>x,renderCompatibility(){},renderCurrent:async()=>{},buildThumbs(){},updateUiText(){},syncState(){},showToast(){},console});
- const old=c.openFile({name:'a.pptx',size:1});await new Promise(setImmediate);const recent=c.openFile({name:'b.pptx',size:1});await Promise.resolve();const newer={slides:[0,1],compat:[],notes:[]};b.resolve(newer);await recent;a.resolve({slides:[0],cleanup(){disposed++}});await old;assert.equal(state.deck,newer);assert.equal(state.file.name,'b.pptx');assert.equal(disposed,1);
+ const old=c.openFile({name:'a.pptx',size:1});await new Promise(setImmediate);const recent=c.openFile({name:'b.pptx',size:1});await Promise.resolve();const newer={slides:[0,1],compat:[],notes:[]};b.resolve(newer);await recent;a.resolve({slides:[0],cleanup(){disposed++}});await old;assert.equal(state.deck,newer);assert.equal(state.file.name,'b.pptx');assert.equal(state.phase,'ready');assert.equal(disposed,1);
 });
 test('old asynchronous PDF cleanup cannot clear a replacement source or surface',async()=>{
  const destroy=deferred(),elements=new Map(),$=s=>{if(!elements.has(s))elements.set(s,element());return elements.get(s)};

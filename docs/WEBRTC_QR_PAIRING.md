@@ -310,3 +310,6 @@ At minimum, test on real devices:
 8. Force failure with a VPN / guest network and inspect the diagnostics.
 9. Deny camera permission and confirm the manual code path still works.
 10. Inspect DevTools and confirm no runtime CDN/API request is made.
+
+
+The scanner guide is an overlay only: its equal width and height are 76% of the smaller displayed frame side. ResizeObserver (or a resize fallback) follows layout/orientation changes and is disconnected on scanner stop. The video and full-frame decoder input are unchanged.
