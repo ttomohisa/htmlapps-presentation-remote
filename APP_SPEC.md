@@ -12,7 +12,7 @@ The application is local-first and account-free. The selected deck stays on the 
 
 ## 2. Release target
 
-- Version: `1.0.7`
+- Version: `1.1.0`
 - One-file readable build: `dist/index.html`
 - One-file self-extracting build: `dist/index.self-extract.html`
 - Japanese and English in the same HTML.
@@ -475,3 +475,14 @@ The phone surface is optimized for use while speaking rather than for configurat
 ## Smartphone informational footer
 
 Hide only the informational footer at the existing smartphone layout query `(max-width:720px), (max-height:560px) and (orientation:landscape) and (max-width:1000px)`; preserve desktop visibility and functional controls. Preserve the distinct no-deck-upload and direct WebRTC explanations; do not replace them with a wholly-local claim.
+
+
+## v1.1.0 — confirmed command results, presentation timer and square scan guide
+
+- Control protocol v4 is extended additively with state capabilities `features.commandResults: 1` and `features.timer: 1`. Legacy navigation remains available; a legacy host cannot confirm completion or expose the new timer controls.
+- Each supported command includes client session, sequence, host session and deck revision. The host deduplicates the last 64 session/sequence results and replies with `command-result` only after processing/rendering completes. Rejected, failed or superseded operations never report applied. This confirms application processing, not a physical monitor or projector.
+- The phone shows Sending / Applied on PC / Could not confirm reflection for the latest operation. A 10-second timeout, send failure, disconnect, host/deck change or negative result is unconfirmed. Late/foreign results are ignored. There is no automatic command resend; an uncertain operation may still have been applied. Immediate button/haptic feedback means sent, not applied.
+- The PC timer owns idle/running/paused state, accumulated monotonic elapsed time and duration. Start talk, Pause, Resume and Reset are independent of fullscreen. Opening/replacing a deck resets elapsed/state to idle and retains duration. Reloading does not persist timer state.
+- Duration is unlimited (0), preset 5/10/15/20/30/60 minutes, or a validated whole custom 1–180 minutes. Apply commits the edit. Phone drafts survive periodic state updates and unrelated/older command results. Elapsed, remaining and overtime are visible; zero never stops slides. Phone elapsed extrapolates only running snapshots and resynchronizes from PC state.
+- Timer controls are available on PC and phone More. Unsupported/disconnected phone controls are disabled. Status is conveyed in words, not color alone; second-by-second clock changes are not live-region announcements.
+- Only the QR scanner guide changes geometry: centered equal width/height at 76% of the smaller displayed frame dimension, including rotation/resize. Camera stream, object-fit and full-video decoder input are unchanged. Resize observation is cleaned up on scanner stop.

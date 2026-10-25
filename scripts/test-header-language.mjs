@@ -38,7 +38,7 @@ function harness(lang){
   state:{lang,pairing:null},language:lang,role:'',recording:false,storageKeys:{language:`${app.slug}:language`},
   localStorage:{getItem:key=>saved.get(key)||null,setItem:(key,value)=>saved.set(key,value)},
   renderSensorRoster(){},renderSensorLayoutPanel(){},renderRecordMarkers(){},updateSelectedPeerUi(){},renderExperimentPresetUi(){},updateMeasurementModeUi(){},updateDisplayModeUi(){},renderImpactPanel(){},renderPostAnalysis(){},updateSensorResourceUi(){},
-  updateUiText(){},refreshLoadedDocumentText(){},renderRemotePresenterView(){},renderConnectionRecoveryUi(){},renderWakeLockUi(){},renderSlideJumpDialog(){}};
+  updateUiText(){},refreshLoadedDocumentText(){},renderRemotePresenterView(){},renderConnectionRecoveryUi(){},renderWakeLockUi(){},renderSlideJumpDialog(){},renderCommandStatus(){},renderTimerUi(){}};
  vm.createContext(ctx);
  const translationStart=source.indexOf(presentation?'const T={':'      const translations={');
  const translationEnd=source.indexOf(presentation?'const $=':'      const $=',translationStart);
@@ -86,4 +86,4 @@ for(const lang of ['en','ja']){
   else assert.match(help,lang==='ja'?/接続相手へ直接/:/directly to the peer/);
  });
 }
-test('canonical patch version is bumped exactly once',()=>assert.equal(app.version,'1.0.7'));
+test('canonical patch version is bumped exactly once',()=>assert.equal(app.version,'1.1.0'));

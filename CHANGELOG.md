@@ -1,6 +1,12 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 - 2026-10-25
+
+- Add host-confirmed operation results with visible Sending / Applied on PC / Unconfirmed states, bounded duplicate suppression, stale-result guards and no automatic retries.
+- Add explicit start/pause/resume/reset, host-synchronized elapsed/remaining/overtime, and applied unlimited/preset/custom 1–180 minute durations. Loading a deck no longer starts timing; fullscreen remains independent.
+- Keep the QR scanner guide square and centered across camera-frame sizes and orientation changes without altering camera or decoder input.
+- Add behavioral regressions, retain legacy navigation without claiming unsupported confirmation, and update Japanese/English Help.
+
 
 - Hide only the informational footer at the existing smartphone layout query `(max-width:720px), (max-height:560px) and (orientation:landscape) and (max-width:1000px)`; preserve desktop visibility and functional controls. Preserve the distinct no-deck-upload and direct WebRTC explanations; do not replace them with a wholly-local claim.
 

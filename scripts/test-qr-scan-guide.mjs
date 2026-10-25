@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+
+for(const file of ['src/index.template.html','components/webrtc-qr-pairing.html']){
+ const source=fs.readFileSync(new URL('../'+file,import.meta.url),'utf8');
+ function fn(name){const match=source.match(new RegExp('    function '+name+'\\([^\\n]+'));assert.ok(match,`${name} exists in ${file}`);return match[0]}
+ function harness(observer=true){let rect={width:360,height:540},resize,callback,disconnected=0;const properties=new Map(),frame={getBoundingClientRect:()=>rect,style:{setProperty:(k,v)=>properties.set(k,v)}};const window={addEventListener:(k,fn)=>{resize=fn},removeEventListener:(k,fn)=>{assert.equal(fn,resize);resize=null}};if(observer)window.ResizeObserver=class{constructor(fn){callback=fn}observe(target){assert.equal(target,frame)}disconnect(){disconnected++}};const c=vm.createContext({window,state:{scanner:{}},scannerElements:()=>({video:{parentElement:frame}})});vm.runInContext(['updateScanGuide','stopScanGuide','watchScanGuide'].map(fn).join('\n'),c);return{c,properties,resize:()=>resize?.(),notify:()=>callback?.(),setRect:r=>rect=r,disconnected:()=>disconnected}}
+ test(`${file}: guide follows the shorter frame side for portrait, landscape and narrow viewports`,()=>{const h=harness();h.c.watchScanGuide('join');assert.equal(h.properties.get('--scan-guide-size'),'273px');h.setRect({width:640,height:280});h.notify();assert.equal(h.properties.get('--scan-guide-size'),'212px');h.setRect({width:220,height:260});h.notify();assert.equal(h.properties.get('--scan-guide-size'),'167px');h.c.stopScanGuide();assert.equal(h.disconnected(),1)});
+ test(`${file}: resize fallback is cleaned up when scanner closes`,()=>{const h=harness(false);h.c.watchScanGuide('host');h.setRect({width:640,height:300});h.resize();assert.equal(h.properties.get('--scan-guide-size'),'228px');h.c.stopScanGuide();h.setRect({width:200,height:300});h.resize();assert.equal(h.properties.get('--scan-guide-size'),'228px')});
+ test(`${file}: square guide CSS changes the overlay only, with cleanup on stop`,()=>{const styles=[...source.matchAll(/\.app-webrtc-scan-guide \{([^}]+)\}/g)];assert.ok(styles.length);for(const [,s] of styles){assert.match(s,/width:var\(--scan-guide-size/);assert.match(s,/height:var\(--scan-guide-size/);assert.match(s,/box-sizing:border-box/);assert.doesNotMatch(s,/inset:12%/)}assert.match(source,/function stopScanner\(\)\{stopScanGuide\(\)/);assert.match(source,/els\.panel\.hidden=false;watchScanGuide\(role\)/);assert.match(source,/drawImage\(video,0,0,w,h\)/,'decoder still receives the whole video')});
+}

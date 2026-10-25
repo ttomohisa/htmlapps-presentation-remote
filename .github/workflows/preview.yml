@@ -53,6 +53,20 @@ jobs:
         New-Item -ItemType Directory -Force -Path test-results/mobile-footer | Out-Null
         node scripts/mobile-footer.browser.cjs 2>&1 | Tee-Object -FilePath test-results/mobile-footer/results.log
         if ($LASTEXITCODE -ne 0) { throw "Footer browser regression failed." }
+    - name: Verify v1.1.0 controls, timer and QR guide in Chromium
+      shell: pwsh
+      run: |
+        $env:NODE_PATH = Join-Path $env:RUNNER_TEMP "mobile-footer-tests/node_modules"
+        node scripts/v110.browser.cjs
+        if ($LASTEXITCODE -ne 0) { throw "v1.1.0 browser regression failed." }
+    - name: Upload v1.1.0 browser evidence
+      if: always()
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+      with:
+        name: v110-browser-evidence
+        path: test-results/v110/
+        if-no-files-found: ignore
+        retention-days: 7
     - name: Upload footer browser evidence
       if: always()
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
