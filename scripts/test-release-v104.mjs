@@ -44,7 +44,7 @@ must(html.includes('const PROTOCOL_VERSION=4'),'stable protocol v4');
 must(html.includes('const MAX_FILE_BYTES=150*1024*1024'),'150 MB local file limit');
 
 const placeholders = [...html.matchAll(/__[A-Z0-9_]+__/g)].map(m=>m[0]);
-const allowed = new Set(['__APP_CONFIG_JSON__','__BUILD_MANIFEST_JSON__','__EMBEDDED_ASSET_BUNDLE_JSON__','__BK_DEV__','__PRESENTATION_APP_BOOT__']);
+const allowed = new Set(['__BK_UI_CSS__','__BK_UI_JS__','__APP_CONFIG_JSON__','__BUILD_MANIFEST_JSON__','__EMBEDDED_ASSET_BUNDLE_JSON__','__BK_DEV__','__PRESENTATION_APP_BOOT__']);
 for (const token of placeholders) must(allowed.has(token),`unexpected placeholder ${token}`);
 
 console.log('v1.0.4 release metadata / screenshots / privacy / offline invariants passed.');

@@ -46,7 +46,7 @@ must(html.includes("const stagingHost=document.createElement('div')"),'connected
 must(html.indexOf('document.body.append(stagingHost)') < html.indexOf('await handle.ready'),'PPTX slide connects before renderer readiness');
 
 const placeholders = [...html.matchAll(/__[A-Z0-9_]+__/g)].map(m=>m[0]);
-const allowed = new Set(['__APP_CONFIG_JSON__','__BUILD_MANIFEST_JSON__','__EMBEDDED_ASSET_BUNDLE_JSON__','__BK_DEV__','__PRESENTATION_APP_BOOT__']);
+const allowed = new Set(['__BK_UI_CSS__','__BK_UI_JS__','__APP_CONFIG_JSON__','__BUILD_MANIFEST_JSON__','__EMBEDDED_ASSET_BUNDLE_JSON__','__BK_DEV__','__PRESENTATION_APP_BOOT__']);
 for (const token of placeholders) must(allowed.has(token),`unexpected placeholder ${token}`);
 
 console.log('v1.0.5 release metadata / screenshots / privacy / offline invariants passed.');

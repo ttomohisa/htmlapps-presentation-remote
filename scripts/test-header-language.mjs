@@ -1,3 +1,5 @@
+import {createRequire} from 'node:module';
+const sharedUI=createRequire(import.meta.url)('../components/ui-conventions.js');
 // Runs real translation, language-update and click-handler code with a minimal
 // DOM adapter. This is not browser layout, focus, permissions or WebRTC testing.
 import fs from 'node:fs';
@@ -34,7 +36,7 @@ function harness(lang){
  }
  const $=selector=>{if(!byId.has(selector))byId.set(selector,element());return byId.get(selector)};
  const $$=selector=>nodes.filter(el=>selector.slice(1,-1) in el.attributes);
- const ctx={APP_CONFIG:app,document:{documentElement:{lang:''}},navigator:{language:lang},$: $, $$,
+ const ctx={BrowserKittyUI:{...sharedUI,chooseLanguage:lang=>sharedUI.chooseLanguage(lang,{storage:ctx.localStorage})},appConfirmRequest:null,APP_CONFIG:app,document:{documentElement:{lang:''}},navigator:{language:lang},$: $, $$,
   state:{lang,pairing:null},language:lang,role:'',recording:false,storageKeys:{language:`${app.slug}:language`},
   localStorage:{getItem:key=>saved.get(key)||null,setItem:(key,value)=>saved.set(key,value)},
   renderSensorRoster(){},renderSensorLayoutPanel(){},renderRecordMarkers(){},updateSelectedPeerUi(){},renderExperimentPresetUi(){},updateMeasurementModeUi(){},updateDisplayModeUi(){},renderImpactPanel(){},renderPostAnalysis(){},updateSensorResourceUi(){},
@@ -43,7 +45,7 @@ function harness(lang){
  const translationStart=source.indexOf(presentation?'const T={':'      const translations={');
  const translationEnd=source.indexOf(presentation?'const $=':'      const $=',translationStart);
  vm.runInContext(source.slice(translationStart,translationEnd),ctx);
- const names=presentation?['tr','applyI18n','setLanguage']:['t','applyLanguage','readStorage','writeStorage'];
+ const names=presentation?['tr','preferenceRecord','renderCommonUi','refreshAppConfirm','applyI18n','setLanguage']:['t','applyLanguage','readStorage','writeStorage'];
  vm.runInContext(names.map(extract).join('\n'),ctx);
  const binding=source.match(/\$\('#languageButton'\)\.addEventListener\('click',[^\n]*?\);(?=\n|$)/)?.[0];
  assert.ok(binding,'Actual language click handler exists');
@@ -72,7 +74,7 @@ for(const lang of ['en','ja']){
   for(let i=0;i<4;i++){
    button.events.click();current=current==='ja'?'en':'ja';
    assert.equal(h.ctx.document.documentElement.lang,current);
-   assert.equal(h.saved.get(`${app.slug}:language`),current);
+   assert.equal(h.saved.get(sharedUI.languageKey),current);
    assert.equal(button.textContent,current==='ja'?'EN':'JA');
    assert.equal(button.getAttribute('aria-label'),current==='ja'?'英語に切り替え':'Switch to Japanese');
    assert.equal(button.title,button.getAttribute('aria-label'));

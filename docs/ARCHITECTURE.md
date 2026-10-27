@@ -91,3 +91,6 @@ Keep source in one HTML while it remains understandable. When an app grows subst
 - No runtime external resource.
 - Clear state ownership.
 - A build that fails on missing input.
+
+## Common UI v1
+Fixed ui-conventions JS/CSS embed through scripts/embed-ui-conventions.ps1 with canonical hash checks. Preference domains own existing synchronous storage writes and retain live values on errors; language render never writes them. The canonical confirmation component is adapted in the app scope for UI-triggered timer reset, with captured deck/host identity; the timer engine and DataChannel protocol remain unchanged. Persistent source-status keys supplement existing loading/error phases without changing parse/disposal generations.

@@ -285,3 +285,7 @@
 - Added the canonical fully serverless QR WebRTC pairing flow from the single-HTML template.
 - Added separate reliable control and low-latency pointer DataChannels.
 - Added smartphone remote UI with next/previous, jump, blank screen and touch pointer controls.
+
+## Unreleased
+- Integrate fixed common UI v1 with scoped preference persistence/retry, tab retention, translated persistent load failures, real action states and Cancel-first elapsed-time reset confirmation.
+- Preserve renderer/transport/protocol/timer engines and existing preference schemas; default builds synchronize the tracked single-file entry point.

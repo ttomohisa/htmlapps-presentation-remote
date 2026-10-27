@@ -214,3 +214,6 @@ Licensed under the [MIT License](LICENSE).
 ### v1.1.0 browser regression
 
 With Playwright installed, run `node scripts/v110.browser.cjs` after building. It creates a synthetic three-page PDF, pairs two real Chromium contexts over WebRTC, checks command results and timer controls (including a real one-minute expiry), and measures the square guide using Chromium's synthetic camera. `test-results/v110/` contains screenshots and results. No user document or actual camera is used. The PR preview workflow runs this check.
+
+### Work and preference retention
+Decks, timers and connection state last for this tab. Only the existing display/vibration/motion preferences save in the browser. Failed preference saves keep your current settings and show a matching Retry under Preference save status. Timer reset asks before resetting elapsed time; duration, deck and connection remain. Opening another deck resets elapsed time as shown in the workspace.

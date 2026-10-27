@@ -1,3 +1,5 @@
+import {createRequire} from 'node:module';
+const sharedUI=createRequire(import.meta.url)('../components/ui-conventions.js');
 import fs from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
@@ -11,11 +13,11 @@ function harness(remote={}){
  const sent=[],feedback=[],haptics=[],flashes=[],storage=[],elements=new Map();
  const el=()=>({disabled:false,hidden:false,checked:false,textContent:'',dataset:{},handlers:{},classList:{toggle(){}},setAttribute(){},removeAttribute(){},addEventListener(k,fn){this.handlers[k]=fn}});
  const $=s=>{if(!elements.has(s))elements.set(s,el());return elements.get(s)};
- const c=vm.createContext({$,performance:{now:()=>now},PROTOCOL_VERSION:4,POINTER_BUFFER_LIMIT:65536,DISCONNECT_GRACE_MS:8000,APP_CONFIG:{slug:'test'},DEV:null,URL:{revokeObjectURL(){}},setTimeout:()=>1,clearTimeout(){},localStorage:{setItem:(...x)=>storage.push(x)},transportSession:()=> 'synthetic-session',haptic:x=>haptics.push(x),commandFeedback:x=>feedback.push(x),flashRemoteGesture:x=>flashes.push(x),tr:x=>x,fmtTime:x=>String(x),remoteElapsedMs:()=>0,renderMotionUi(){},renderTimerUi(){},renderRemotePresenterView(){},renderConnectionRecoveryUi(){},renderWakeLockUi(){},renderSlideJumpDialog(){},updateLinkUi(){},applyI18n(){},refreshLoadedDocumentText(){},ensureWakeLock(){},releaseWakeLock(){},closeSlideJumpDialog(){},clearDisconnectTimer(){},showToast(){},scheduleRemotePreviewRequest(){}});
+ const c=vm.createContext({appConfirmRequest:null,BrowserKittyUI:{...sharedUI,chooseLanguage:lang=>sharedUI.chooseLanguage(lang,{storage:{setItem:(k,v)=>storage.push([k,v])}})},$,performance:{now:()=>now},PROTOCOL_VERSION:4,POINTER_BUFFER_LIMIT:65536,DISCONNECT_GRACE_MS:8000,APP_CONFIG:{slug:'test'},DEV:null,URL:{revokeObjectURL(){}},setTimeout:()=>1,clearTimeout(){},localStorage:{setItem:(...x)=>storage.push(x)},transportSession:()=> 'synthetic-session',haptic:x=>haptics.push(x),commandFeedback:x=>feedback.push(x),flashRemoteGesture:x=>flashes.push(x),tr:x=>x,fmtTime:x=>String(x),remoteElapsedMs:()=>0,renderMotionUi(){},renderTimerUi(){},renderRemotePresenterView(){},renderConnectionRecoveryUi(){},renderWakeLockUi(){},renderSlideJumpDialog(){},updateLinkUi(){},applyI18n(){},refreshLoadedDocumentText(){},ensureWakeLock(){},releaseWakeLock(){},closeSlideJumpDialog(){},clearDisconnectTimer(){},showToast(){},scheduleRemotePreviewRequest(){}});
  vm.runInContext(html.split('\n').find(x=>x.startsWith('const state='))+'\nglobalThis.state=state;',c);
  const state=c.state;Object.assign(state.remote,{index:1,total:3,totalKnown:true,connected:true,...remote});
  state.channels.control={readyState:'open',bufferedAmount:0,send:x=>sent.push(JSON.parse(x))};
- const names=['sendChannel','sendCommand','setupRemoteSwipe','renderRemoteState','toggleRemoteMore','setLanguage','onAppDisconnected','markTransportRecovered','handleControlMessage','previewCacheClear','renderCommandStatus','invalidatePendingCommands','finishPendingCommand'];
+ const names=['preferenceRecord','renderCommonUi','refreshAppConfirm','sendChannel','sendCommand','setupRemoteSwipe','renderRemoteState','toggleRemoteMore','setLanguage','onAppDisconnected','markTransportRecovered','handleControlMessage','previewCacheClear','renderCommandStatus','invalidatePendingCommands','finishPendingCommand'];
  if(html.includes('function setRemoteSwipeNavigation('))names.push('setRemoteSwipeNavigation');
  vm.runInContext(names.map(source).join('\n'),c);c.setupRemoteSwipe();c.renderRemoteState();
  const line=html.split('\n').find(x=>x.startsWith(" $('#remotePrev').addEventListener"));
@@ -63,7 +65,7 @@ for(const values of [[false],[false,true]])test(`changing the setting ${values.j
 test('enabling swipe during an off-mode drag does not turn that old drag into navigation',()=>{const h=harness();h.toggle(false);h.down();h.toggle(true);h.up();h.$('#remoteNext').handlers.click();noCommand(h);h.advance(361);h.swipe();assert.equal(h.sent.length,1)});
 
 test('off choice survives host updates, deck replacement, reconnect and language changes',()=>{
- const h=harness();h.toggle(false);h.c.handleControlMessage('join',JSON.stringify({type:'state',index:1,total:4,deckRevision:2}));assert.equal(h.state.remoteUi.swipeNavigation,false);h.c.onAppDisconnected('join',true);h.c.markTransportRecovered('join');h.c.setLanguage('en');h.c.setLanguage('ja');h.c.renderRemoteState();assert.equal(h.$('#remoteSwipeNavigation').checked,false);h.swipe();noCommand(h);assert.deepEqual(h.storage.map(x=>x[0]),['test:language','test:language']);
+ const h=harness();h.toggle(false);h.c.handleControlMessage('join',JSON.stringify({type:'state',index:1,total:4,deckRevision:2}));assert.equal(h.state.remoteUi.swipeNavigation,false);h.c.onAppDisconnected('join',true);h.c.markTransportRecovered('join');h.c.setLanguage('en');h.c.setLanguage('ja');h.c.renderRemoteState();assert.equal(h.$('#remoteSwipeNavigation').checked,false);h.swipe();noCommand(h);assert.deepEqual(h.storage.map(x=>x[0]),[sharedUI.languageKey,sharedUI.languageKey]);
 });
 
 for(const remote of [{connected:false},{reconnecting:true},{lost:true}])test(`unavailable control state ${JSON.stringify(remote)} never sends swipe or button commands`,()=>{const h=harness(remote);h.swipe();h.$('#remoteNext').handlers.click();noCommand(h)});

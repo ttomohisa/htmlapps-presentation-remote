@@ -232,3 +232,6 @@ Useful mount options include `initialPage`, `pageTopTarget`, `pageTopOffset`, `o
 - Keep `env(safe-area-inset-bottom)` and enough body bottom padding so content cannot hide behind the bar.
 - Preserve visible focus, `aria-current`, semantic buttons, and native `disabled` behavior.
 - Test at 320, 360, 390/393, and 430px widths and confirm there is no page-level horizontal scrolling.
+
+## Common UI v1
+Fixed shared files are embedded at build time. Executable button markup explicitly opts in; view/mode/pressed-state choices retain existing selection styles. QR offer/answer creation connects shared busy states to the existing async operations. Canonical AppConfirm styling/native-dialog behavior is reused with live copy, initial Cancel, Escape/backdrop cancel and opener focus. Preference domains/status and UI timer confirmation remain app-owned.

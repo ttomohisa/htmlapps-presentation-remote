@@ -492,3 +492,9 @@ Hide only the informational footer at the existing smartphone layout query `(max
 - Shorten the existing shield badge to 資料のアップロードなし without changing the English no-deck-upload wording or direct WebRTC disclosure.
 
 - Keep the complete current header version visible at 320px, 360px and 390px; only the app title may truncate, never the version or header controls.
+
+## Common UI conventions v1
+- Deck bytes, slide contents, timer and connection state stay in the tab. Existing display/vibration/note-size/motion preferences retain their original keys and primitive formats. Each preference domain has persistent save failure/status and a matching Retry; retries write settings without restarting previews or changing live work. Startup resolution uses URL/common/legacy/browser language priority without writes; explicit switch failure gets screen-only guidance.
+- Source-load failures remain visible and translate with a retry/choose-file path. Opening another deck still discards the previous view and elapsed timer as visibly disclosed; existing source/render generations and disposal remain unchanged.
+- Timer reset UI names elapsed time and asks a Cancel-first app confirmation. It resets elapsed time/idle only; duration, deck and connection remain. Phone confirmation sends the existing timer-reset command once; stale deck/host confirmations are ignored. The protocol receiver and timer engine are unchanged.
+- Executable controls opt into shared colors/native disabled state. QR offer/answer generation uses shared busy state. Choice/mode selection remains application-owned. No file output, backup, autosave of decks, Undo or Stop is added.

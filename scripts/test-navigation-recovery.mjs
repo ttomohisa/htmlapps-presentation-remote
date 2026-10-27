@@ -5,7 +5,7 @@ import test from 'node:test';
 
 const html=fs.readFileSync(new URL('../src/index.template.html',import.meta.url),'utf8');
 function source(name){const start=html.search(new RegExp(`^(?:async )?function ${name}\\(`,'m'));assert.ok(start>=0,`${name} exists`);const rest=html.slice(start),end=rest.slice(1).search(/\n(?:async )?function |\nclass /);return end<0?rest:rest.slice(0,end+1)}
-function context(names,values){const c=vm.createContext(values);vm.runInContext(names.map(source).join('\n'),c);return c}
+function context(names,values){const c=vm.createContext({setSourceStatus(){},...values});vm.runInContext(names.map(source).join('\n'),c);return c}
 const deferred=()=>{let resolve;const promise=new Promise(r=>resolve=r);return{promise,resolve}};
 const element=()=>({value:'',style:{},dataset:{},children:[],classList:{contains:()=>false,toggle(){}},setAttribute(){},removeAttribute(){},replaceChildren(...a){this.children=a},append(x){this.children.push(x)},remove(){},setCustomValidity(x){this.error=x},reportValidity(){this.reported=true}});
 
