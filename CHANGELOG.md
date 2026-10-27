@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1
+
+- Verify the complete current header version at narrow phone widths; reserve space for the version beside truncated app titles.
+- 1.1.1: Shorten the existing shield badge to 資料のアップロードなし without changing the English no-deck-upload wording or direct WebRTC disclosure.
+
 ## 1.1.0 - 2026-10-25
 
 - Add host-confirmed operation results with visible Sending / Applied on PC / Unconfirmed states, bounded duplicate suppression, stale-result guards and no automatic retries.

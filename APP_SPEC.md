@@ -12,7 +12,7 @@ The application is local-first and account-free. The selected deck stays on the 
 
 ## 2. Release target
 
-- Version: `1.1.0`
+- Version: `1.1.1`
 - One-file readable build: `dist/index.html`
 - One-file self-extracting build: `dist/index.self-extract.html`
 - Japanese and English in the same HTML.
@@ -486,3 +486,9 @@ Hide only the informational footer at the existing smartphone layout query `(max
 - Duration is unlimited (0), preset 5/10/15/20/30/60 minutes, or a validated whole custom 1–180 minutes. Apply commits the edit. Phone drafts survive periodic state updates and unrelated/older command results. Elapsed, remaining and overtime are visible; zero never stops slides. Phone elapsed extrapolates only running snapshots and resynchronizes from PC state.
 - Timer controls are available on PC and phone More. Unsupported/disconnected phone controls are disabled. Status is conveyed in words, not color alone; second-by-second clock changes are not live-region announcements.
 - Only the QR scanner guide changes geometry: centered equal width/height at 76% of the smaller displayed frame dimension, including rotation/resize. Camera stream, object-fit and full-video decoder input are unchanged. Resize observation is cleaned up on scanner stop.
+
+## UI symbol consistency (v1.1.1)
+
+- Shorten the existing shield badge to 資料のアップロードなし without changing the English no-deck-upload wording or direct WebRTC disclosure.
+
+- Keep the complete current header version visible at 320px, 360px and 390px; only the app title may truncate, never the version or header controls.
