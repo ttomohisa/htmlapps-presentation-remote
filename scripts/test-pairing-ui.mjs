@@ -12,5 +12,6 @@ for(const s of all){
 }
 assert.ok(fragment(all[0]).includes("q('[data-join-scan]').hidden=true"));
 assert.ok(fragment(all[0]).includes("q('[data-join-scan]').hidden=Boolean(state.join.pendingOffer)"));
+assert.ok(fragment(all[0]).includes("setCoach('join','failed');setStatus('join',t('retryExhausted')"));
 for(const s of all.slice(1)){assert.ok(s.includes('data-i18n="helpRtcNearby"'));assert.equal((s.match(/helpRtcNearby:/g)||[]).length,2);}
 console.log('Pairing UX regression passed');
