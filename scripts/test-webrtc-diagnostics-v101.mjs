@@ -75,7 +75,14 @@ const ja = {
 const q = ()=>renderedEl;
 const t = key=>ja[key] ?? key;
 const state={host:{lastPairStats:null},join:{lastPairStats:null}};
-const diagnosticsApi = new Function('q','t','state',`${html.slice(renderStart,renderEnd)}; return {updateDiagnostics};`)(q,t,state);
+const diagnosticsImpl = new Function('q','t','state','language',`${html.slice(renderStart,renderEnd)}; return {updateDiagnostics};`)(q,t,state,'ja');
+const diagnosticsApi = {
+  updateDiagnostics(role,pc,extra) {
+    // Production diagnostics only display results from the currently active PeerConnection.
+    state[role].pc=pc;
+    return diagnosticsImpl.updateDiagnostics(role,pc,extra);
+  }
+};
 const sdpLocal='v=0\r\na=candidate:1 1 UDP 1 192.168.1.2 5000 typ host\r\n';
 const sdpRemote='v=0\r\na=candidate:2 1 UDP 1 192.168.1.3 5001 typ host\r\n';
 const renderReports = [
