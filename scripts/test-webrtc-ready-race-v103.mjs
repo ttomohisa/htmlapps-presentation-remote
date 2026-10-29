@@ -6,7 +6,7 @@ const must=(cond,label)=>{if(!cond)throw new Error(`WebRTC v1.0.3 readiness race
 const has=(needle,label=needle)=>must(html.includes(needle),label);
 
 has("createDefaultChannel:true,dataChannelLabel:CONTROL_CHANNEL,dataChannelInit:{ordered:true}",'control channel is the pairing component default channel');
-must(component.includes("if(options.createDefaultChannel!==false&&(!bucket.channel||bucket.channel.readyState!=='open'))return;"),'pairing component defers connected callback until default control channel is open');
+must(component.includes("if(options.createDefaultChannel!==false&&(!bucket.channel||bucket.channel.label!==options.dataChannelLabel||bucket.channel.readyState!=='open'))return;"),'pairing component defers connected callback until default control channel is open');
 must(!html.includes("createDefaultChannel:false,payloadPrefix:'bkpr1'"),'custom pairing no longer disables the default readiness channel');
 const setup=html.match(/function setupPairing\(\)\{[^\n]+\}/)?.[0]||'';
 must(!setup.includes('createDataChannel(CONTROL_CHANNEL'),'host does not create a duplicate control channel');

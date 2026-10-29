@@ -10,7 +10,8 @@ must(!/function previewTransportChannel\(\)\{[^}]*state\.channels\.control/.test
 // v1.0.3 moved reliable control creation into the canonical pairing component.
 has("createDefaultChannel:true,dataChannelLabel:CONTROL_CHANNEL,dataChannelInit:{ordered:true}",'host creates reliable control through pairing component');
 has("onChannel({role,channel}){rememberChannel(role,channel)}",'created control channel is registered by callback');
-must(component.includes("bindChannel('host',ch,pc,attempt)"), 'component binds newly created control channel');
+must(component.includes('const ch=api.createDataChannel(options.dataChannelLabel,options.dataChannelInit);'), 'component creates the default control channel before app-specific channels');
+must(component.indexOf('const ch=api.createDataChannel(options.dataChannelLabel,options.dataChannelInit);') < component.indexOf("if(typeof options.onPeerCreated==='function')options.onPeerCreated(api);"), 'control channel is first, matching v1.0.0');
 has("rememberChannel(role,createDataChannel(PREVIEW_CHANNEL,{ordered:true}))",'host registers preview channel immediately');
 has('function markTransportLongDisconnected(role)','long-disconnect state is separate from hard failure');
 const longBlock=html.match(/function markTransportLongDisconnected\(role\)\{[^\n]+\}/)?.[0]||'';
