@@ -86,4 +86,4 @@ for(const lang of ['en','ja']){
   else assert.match(help,lang==='ja'?/接続相手へ直接/:/directly to the peer/);
  });
 }
-test('canonical patch version is bumped exactly once',()=>assert.equal(app.version,'1.1.1'));
+test('canonical patch version is v1.1.2',()=>assert.equal(app.version,'1.1.2'));
