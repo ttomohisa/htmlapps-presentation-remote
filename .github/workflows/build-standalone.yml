@@ -39,6 +39,23 @@ jobs:
         shell: pwsh
         run: ./scripts/check-repository.ps1
 
+      - name: Verify v1.1.2 release package in PR CI
+        shell: pwsh
+        run: |
+          ./scripts/package-release-v112.ps1
+
+      - name: Upload release candidate files
+        uses: actions/upload-artifact@v7
+        with:
+          name: v112-release-candidate-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            release-out/htmlapps-presentation-remote-v1.1.2.html
+            release-out/htmlapps-presentation-remote-v1.1.2.self-extract.html
+            release-out/htmlapps-presentation-remote-v1.1.2.zip
+            release-out/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Upload standalone artifact
         uses: actions/upload-artifact@v7
         with:
