@@ -49,7 +49,7 @@ new RTCPeerConnection({ iceServers: [] });
 - 再試行前に古いPeerConnection/DataChannel/カメラ/タイマーを破棄
 - **参加端末はOffer読取直後にAnswerを作らない**
 - ホストの返答QRスキャナーを先に準備してからAnswerを作る
-- 接続前ICE失敗時にAnswer QRを最大3回自動再生成
+- 接続前の失敗で返答QRを無効化し、ホストの新しい接続QRから再開する（古い返答QRは再利用しない）
 - 接続後のDataChannel callback
 
 ## 必要な依存ライブラリ
@@ -127,7 +127,7 @@ await pairing.startJoin();
 5. ホストのカメラ映像が出た後、ユーザーが「返答QRを作る」を押す。
 6. ここで初めてPeerConnectionを作成してAnswer/ICE収集を開始。
 7. 完成したAnswer QRをホストカメラへ見せる。
-8. Answer提示中に接続前ICEが `failed` になった場合、新しいPeerConnection + Answer QRへ自動更新する。
+8. 接続前ICEが `failed` になった場合、表示中の返答QRとコピー用コードを無効化する。ホスト側で新しいOfferを作り、参加端末で読み取って接続を最初からやり直す。
 
 このAnswer生成遅延は重要です。手動QRシグナリングでは、Answerを作ってからPCカメラを準備する数秒〜十数秒の間に参加端末側ICEが先に失敗するケースがあったため、この順番を標準にしています。
 
@@ -156,7 +156,6 @@ pairing.destroy();
 | --- | --- | --- |
 | `language` | `'ja'` | `'ja'` / `'en'` |
 | `iceGatherTimeoutMs` | `15000` | ICE gathering完了待ち上限 |
-| `answerAutoRetryLimit` | `3` | 接続前Answer自動再生成回数 |
 | `qrChunkSize` | `175` | QR 1ページあたりの文字数 |
 | `payloadPrefix` | `'bkrtc1'` | Offer/Answerコード識別子 |
 | `qrPrefix` | `'bkrtcq1'` | 分割QR識別子 |
@@ -292,8 +291,9 @@ ICE確認中は約1秒ごとに診断を更新し、接続・失敗・終了時�
 - QRタイマーを止める。
 - カメラTrackを止める。
 - 古い非同期処理にはattempt番号を持たせ、新しい試行のUIを上書きさせない。
-- 参加端末のAnswer QR自動再生成では、同じ保存済みOfferを使って新しいPeerConnectionを作る。
-- 自動再生成上限に達したらユーザー操作へ戻す。
+- 接続前の失敗では返答QRとコピー用コードを無効化し、自動再生成しない。
+- ホストも失敗したOfferを無効化する。両端末は新しいOfferから再試行する。
+- QR生成中の非同期処理が遅れて完了しても、無効になったQRを再表示しない。
 - ホスト側で接続自体が失敗した場合は、基本的に新しいOfferからやり直す。
 
 ## CSP / プライバシー
@@ -331,7 +331,7 @@ WebRTC DataChannelの直接接続を許可するために、CDNやAPI接続をCS
 4. 480p / 720p程度のPCカメラでも返答QRを読める。
 5. QRをゆっくり読み取ってもユーザー操作待ちでタイムアウトしない。
 6. ICE収集中に役割変更しても古いエラーが現在UIへ出ない。
-7. Answer提示中の接続前ICE失敗でQRが自動更新される。
+7. Answer提示中の接続前ICE失敗で古いQRが無効になり、新しいホストQRからやり直せる。
 8. VPN / ゲストWi-Fi等で失敗させ、診断が意味のある内容になる。
 9. カメラ権限拒否時に手動コードへ逃げられる。
 10. DevToolsで実行時CDN/APIアクセスがない。
