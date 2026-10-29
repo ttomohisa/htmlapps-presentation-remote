@@ -51,7 +51,7 @@ The build uses Windows PowerShell and the built-in `tar.exe`. Node.js and Python
 2. Use the slide list to confirm the deck, then choose **Start presentation** when you are ready to enter fullscreen.
 3. To connect a phone, choose **Connect phone** on the computer.
 4. On the phone, open the app and choose **Use as remote**, then scan the connection QR shown by the computer.
-5. The phone displays a response QR. Scan that QR with the computer to complete the direct WebRTC connection.
+5. On the computer, select **Scan phone reply QR** to open its camera. Once ready, select **Show reply QR** on the phone and scan it with the computer to finish pairing.
 6. Use the large **Next** button, **Previous**, or a horizontal swipe to move through the presentation. Turn off **Swipe navigation** under **More** to use buttons without accidental swipe navigation. Presenter View shows the current/next slide and speaker notes.
 7. Tap the slide counter to jump directly to another slide. Use **More** for Presenter View, vibration feedback, timer, and reconnect/disconnect actions.
    Swipe navigation starts on when the page loads. Its choice stays through reconnection, language changes and deck replacement, and resets to on after reloading. It is not saved or sent to the paired computer.
@@ -62,6 +62,12 @@ The build uses Windows PowerShell and the built-in `tar.exe`. Node.js and Python
 - **Start presentation** enters fullscreen only. Use **Start talk** to begin timing, then **Pause**, **Resume** or **Reset**. The phone has these controls under **More**.
 - Choose unlimited, a preset, or a custom whole 1–180 minutes, then **Apply**. The PC synchronizes elapsed/remaining/overtime to the phone. Reaching zero does not stop slides. A deck change resets elapsed time while retaining the duration; a page reload resets timer state.
 - The camera's white QR guide stays centered and square in portrait and landscape; it does not crop the decoder input or distort the video.
+
+### Connection troubleshooting
+
+If pairing fails, check that both devices use the same Wi-Fi and that a VPN, guest network, firewall or client isolation is not blocking local traffic. **In Chrome on Android 17**, also check **Settings → Apps → Chrome → Permissions → Nearby devices** and allow access if necessary. This is a troubleshooting step, not a requirement for every Android 17 device. Labels vary by device and browser version.
+
+Use **Technical connection details** in the pairing screen to expand the diagnostics when needed.
 
 ### Help
 

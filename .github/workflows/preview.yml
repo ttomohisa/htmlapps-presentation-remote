@@ -39,6 +39,8 @@ jobs:
       shell: pwsh
       run: |
         ./scripts/check-repository.ps1
+        node scripts/test-pairing-ui.mjs
+        if ($LASTEXITCODE -ne 0) { throw "Pairing UI regression failed." }
         node --test tests/mobile-footer.test.cjs
         if ($LASTEXITCODE -ne 0) { throw "Footer source regression failed." }
     - name: Verify footer and Help in Chromium
