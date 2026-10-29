@@ -75,6 +75,21 @@ jobs:
         path: test-results/mobile-footer/
         if-no-files-found: ignore
         retention-days: 7
+    - name: Check out v1.0.0 reference for manual ICE comparison
+      uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      with:
+        ref: 65e8e58226e7476a07e7d389c9b07252c85869d8
+        path: .preview-baseline-v100
+        persist-credentials: false
+    - name: Stage historical standalone HTML in preview only
+      shell: pwsh
+      run: |
+        $reference = ".preview-baseline-v100/presentation-remote.html"
+        if (-not (Test-Path -LiteralPath $reference)) {
+          throw "v1.0.0 reference standalone HTML is missing."
+        }
+        Copy-Item -LiteralPath $reference -Destination "dist/v100.html"
+        Write-Host "Historical baseline staged as /v100.html for same-origin A/B testing."
     - name: Upload static preview site
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
       with:
