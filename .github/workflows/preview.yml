@@ -41,6 +41,8 @@ jobs:
         ./scripts/check-repository.ps1
         node --test tests/mobile-footer.test.cjs
         if ($LASTEXITCODE -ne 0) { throw "Footer source regression failed." }
+        node scripts/test-webrtc-ice-session-id.mjs
+        if ($LASTEXITCODE -ne 0) { throw "WebRTC ICE session tag regression failed." }
     - name: Verify footer and Help in Chromium
       shell: pwsh
       run: |
