@@ -15,6 +15,7 @@ on:
       - "scripts/build-self-extract.ps1"
       - "scripts/verify-self-extract.ps1"
       - ".github/workflows/build-standalone.yml"
+      - ".github/workflows/release-v112.yml"
 
 permissions:
   contents: read
@@ -31,6 +32,12 @@ jobs:
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
         with:
           node-version: 24
+
+      - name: Check release guard safely against GitHub (read-only)
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/verify-release-state-v112.ps1 -DryRun
 
       - name: Run behavioral regressions
         run: node scripts/test-all.mjs
