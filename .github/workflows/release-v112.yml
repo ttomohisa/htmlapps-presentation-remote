@@ -118,7 +118,9 @@ jobs:
           }
           [System.IO.File]::WriteAllLines((Join-Path $out 'SHA256SUMS.txt'), [string[]]$checksums, (New-Object System.Text.UTF8Encoding($false)))
           foreach ($asset in $assets) {
-            $expected = ($checksums | Where-Object { $_ -like "*  $([System.IO.Path]::GetFileName($asset))" })[0].Split(' ')[0]
+            $matching = @($checksums | Where-Object { $_ -like "*  $([System.IO.Path]::GetFileName($asset))" })
+            if ($matching.Count -ne 1) { throw "Cannot locate checksum: $asset" }
+            $expected = ($matching[0] -split '\\s+')[0]
             $actual = (Get-FileHash -LiteralPath $asset -Algorithm SHA256).Hash.ToLowerInvariant()
             if ($expected -ne $actual) { throw "Checksum mismatch: $asset" }
           }
