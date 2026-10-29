@@ -63,6 +63,12 @@ The build uses Windows PowerShell and the built-in `tar.exe`. Node.js and Python
 - Choose unlimited, a preset, or a custom whole 1–180 minutes, then **Apply**. The PC synchronizes elapsed/remaining/overtime to the phone. Reaching zero does not stop slides. A deck change resets elapsed time while retaining the duration; a page reload resets timer state.
 - The camera's white QR guide stays centered and square in portrait and landscape; it does not crop the decoder input or distort the video.
 
+### Connection troubleshooting
+
+If pairing fails, check that both devices use the same Wi-Fi and that a VPN, guest network, firewall or client isolation is not blocking local traffic. **In Chrome on Android 17**, also check **Settings → Apps → Chrome → Permissions → Nearby devices** and allow access if necessary. This is a troubleshooting step, not a requirement for every Android 17 device. Labels vary by device and browser version.
+
+Use **Technical connection details** in the pairing screen to expand the diagnostics when needed.
+
 ### Help
 
 Open **How to use & notes** from the header. Close it with **Close**, **Esc**, or a click outside the dialog to return to the page.
