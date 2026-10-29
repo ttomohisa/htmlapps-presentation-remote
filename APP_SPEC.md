@@ -12,7 +12,7 @@ The application is local-first and account-free. The selected deck stays on the 
 
 ## 2. Release target
 
-- Version: `1.1.1`
+- Version: `1.1.2`
 - One-file readable build: `dist/index.html`
 - One-file self-extracting build: `dist/index.self-extract.html`
 - Japanese and English in the same HTML.
