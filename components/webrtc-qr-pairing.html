@@ -344,6 +344,15 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
     }
     function addressKind(address) { const value=String(address||'').toLowerCase(); if(value.endsWith('.local'))return'mDNS'; if(value.includes(':'))return'IPv6'; return value?'IPv4':'?'; }
     function summarizeIce(sdp) { const groups=new Map(), candidates=parseIceCandidates(sdp); for(const c of candidates){const key=[c.protocol,c.type,addressKind(c.address),c.tcpType].filter(Boolean).join(' ');groups.set(key,(groups.get(key)||0)+1);} return {count:candidates.length,details:Array.from(groups.entries()).map(([key,count])=>`${key} ×${count}`).join(', ')}; }
+    async function iceSessionTag(sdp) {
+      // Compare current ICE generations across devices without displaying the ICE password or ufrag.
+      const match=String(sdp||'').match(/^a=ice-ufrag:([^\r\n]+)/m);
+      if(!match)return '—';
+      try{
+        const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(match[1]));
+        return Array.from(new Uint8Array(digest).slice(0,5),n=>n.toString(16).padStart(2,'0')).join('').toUpperCase();
+      }catch{return '—';}
+    }
     function stateLabel(value) { const key={new:'stateNew',gathering:'stateGathering',complete:'stateComplete',checking:'stateChecking',connected:'stateConnected',completed:'stateCompleted',connecting:'stateConnecting',disconnected:'stateDisconnected',failed:'stateFailed',closed:'stateClosed'}[value]; return key?t(key):String(value||'—'); }
     function candidateReportLabel(report) { if(!report)return'—'; const protocol=String(report.protocol||'?').toUpperCase(), type=String(report.candidateType||'?'), kind=addressKind(report.address||report.ip||''); const tcp=report.tcpType?` ${report.tcpType}`:''; return `${protocol} ${type} ${kind}${tcp}`; }
     function statCounter(report,key) { const value=Number(report?.[key]); return Number.isFinite(value)&&value>0?value:0; }
@@ -380,12 +389,15 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
     async function updateDiagnostics(role, pc, extra={}) {
       const el=q(`[data-diagnostic="${role}"]`); if(!el||!pc)return;
       const local=summarizeIce(pc.localDescription?.sdp), remote=summarizeIce(pc.remoteDescription?.sdp), freshPairStats=await candidatePairDiagnostics(pc), bucket=state[role];
+      const [localSessionTag,remoteSessionTag]=await Promise.all([iceSessionTag(pc.localDescription?.sdp),iceSessionTag(pc.remoteDescription?.sdp)]);
+      if(state[role].pc!==pc)return;
       const meaningfulPairStats=freshPairStats.available&&(freshPairStats.total>0||freshPairStats.hasCounters||Boolean(freshPairStats.selectedLabel));
       if(meaningfulPairStats)bucket.lastPairStats={...freshPairStats};
       const useLastPairStats=!meaningfulPairStats&&['failed','disconnected'].includes(pc.iceConnectionState)&&bucket.lastPairStats;
       const pairStats=useLastPairStats?bucket.lastPairStats:freshPairStats;
       const lines=[`${t('diagGather')}: ${stateLabel(pc.iceGatheringState)}`,`${t('diagLocal')}: ${local.count}${local.details?` · ${local.details}`:''}`];
       if(pc.remoteDescription)lines.push(`${t('diagRemote')}: ${remote.count}${remote.details?` · ${remote.details}`:''}`);
+      if(pc.localDescription||pc.remoteDescription)lines.push(`${language==='ja'?'接続識別子':'ICE session IDs'}: ${language==='ja'?'自分':'local'} ${localSessionTag} / ${language==='ja'?'相手':'remote'} ${remoteSessionTag}`);
       lines.push(`${t('diagIce')}: ${stateLabel(pc.iceConnectionState)}`,`${t('diagPeer')}: ${stateLabel(pc.connectionState)}`);
       if(pc.remoteDescription){
         lines.push(`${t('diagPair')}: ${pairStats.selectedLabel||t('diagNoPair')}${pairStats.rttMs!==null?` · ${pairStats.rttMs} ms`:''}${useLastPairStats?` · ${t('diagLastObserved')}`:''}`);
