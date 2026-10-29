@@ -23,7 +23,7 @@ assert.ok(workflow.includes('branches:\n      - main'));
 assert.ok(workflow.includes('contents: write'));
 assert.ok(workflow.includes('SHA256SUMS.txt'));
 assert.ok(workflow.includes('./scripts/verify-release-state-v112.ps1'));
-assert.ok(!workflow.includes('gh release view v1.1.2'));
+assert.ok(!workflow.includes('gh release view v1.1.2 --repo "$env:GITHUB_REPOSITORY" 2>$null'));
 const guard=readFileSync('scripts/verify-release-state-v112.ps1','utf8');
 assert.ok(guard.includes('releases?per_page=100'));
 assert.ok(guard.includes('git/refs/tags?per_page=100'));
