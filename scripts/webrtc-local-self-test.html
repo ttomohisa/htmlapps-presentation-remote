@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>WebRTC local self-test / 端末内通信テスト</title>
+<style>
+:root { color-scheme:light; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:#f5f7f6; color:#1c2925; }
+* { box-sizing:border-box; }
+body { margin:0; padding:24px 14px 64px; }
+main { max-width:660px; margin:auto; }
+h1 { font-size:clamp(1.45rem,5vw,1.9rem); line-height:1.3; margin:0 0 16px; }
+p { line-height:1.75; }
+.card { padding:clamp(18px,4vw,28px); background:white; border:1px solid #d8e3df; border-radius:15px; }
+button { appearance:none; background:#16624F; color:white; border:0; border-radius:10px; font:inherit; font-weight:600; padding:13px 22px; min-height:48px; cursor:pointer; }
+button:disabled { opacity:.5; cursor:wait; }
+button:focus-visible { outline:3px solid #2358bc; outline-offset:3px; }
+#status { font-weight:600; margin-top:20px; }
+#status[data-result="success"] { color:#16624F; }
+#status[data-result="failure"] { color:#aa2828; }
+#details { white-space:pre-wrap; overflow-wrap:anywhere; background:#f5f7f6; padding:14px; border:1px solid #dae2df; border-radius:8px; font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace; }
+small { display:block; color:#4b5b55; line-height:1.7; margin-top:16px; }
+</style>
+</head>
+<body>
+<main><div class="card">
+<h1 id="title">WebRTC 端末内通信テスト</h1>
+<p id="intro">この端末のブラウザー内で2つの接続を作り、メッセージを往復させます。PCとスマートフォンの間の通信を確認するテストではありません。</p>
+<button id="start" type="button">テストを開始</button>
+<p id="status" aria-live="polite">未実行</p>
+<pre id="details" aria-live="polite">結果はここに表示されます。</pre>
+<small id="privacy">接続には外部のSTUN/TURNサーバーを使用しません。ファイルの送信や診断結果のアップロードも行いません。IPアドレスは表示しません。このページは開発中PRのプレビュー専用です。</small>
+</div></main>
+<script>
+'use strict';
+(function() {
+  const japanese=(navigator.language||'').toLowerCase().startsWith('ja');
+  document.documentElement.lang=japanese?'ja':'en';
+  const msg=(ja,en)=>japanese?ja:en;
+  const byId=id=>document.getElementById(id);
+  byId('title').textContent=msg('WebRTC 端末内通信テスト','WebRTC same-device test');
+  byId('intro').textContent=msg(
+    'この端末のブラウザー内で2つの接続を作り、メッセージを往復させます。PCとスマートフォンの間の通信を確認するテストではありません。',
+    'Creates two WebRTC peers in this browser and exchanges a message between them. This does not test a connection between a PC and a phone.'
+  );
+  byId('start').textContent=msg('テストを開始','Run self-test');
+  byId('status').textContent=msg('未実行','Not started');
+  byId('details').textContent=msg('結果はここに表示されます。','Results will appear here.');
+  byId('privacy').textContent=msg(
+    '外部のSTUN/TURNサーバーは使用しません。診断結果のアップロードも行いません。IPアドレスは表示しません。このページは開発中PRのプレビュー専用です。',
+    'No external STUN/TURN servers or diagnostic uploads. IP addresses are not displayed. This page is only available in the draft PR preview.'
+  );
+  function summary(pc) {
+    const s=pc.localDescription&&pc.localDescription.sdp||'';
+    const groups={};
+    const lines=s.split(/\r?\n/).filter(x=>x.startsWith('a=candidate:'));
+    for(const line of lines){
+      const protocol=(line.match(/\s(udp|tcp)\s/i)||[])[1]||'?';
+      const kind=(line.match(/\styp\s+(\w+)/i)||[])[1]||'?';
+      const name=protocol.toUpperCase()+' '+kind;
+      groups[name]=(groups[name]||0)+1;
+    }
+    return lines.length+' ('+Object.entries(groups).map(x=>x[0]+': '+x[1]).join(', ')+')';
+  }
+  async function pairStats(pc) {
+    try {
+      const s=await pc.getStats();
+      let pairs=0, succeeded=0, sent=0, received=0;
+      s.forEach(x=>{
+        if(x.type!=='candidate-pair')return;
+        pairs++;
+        if(x.state==='succeeded')succeeded++;
+        sent+=Number(x.requestsSent)||0;
+        received+=Number(x.responsesReceived)||0;
+      });
+      return 'pairs='+pairs+', succeeded='+succeeded+', requestsSent='+sent+', responsesReceived='+received;
+    } catch { return 'unavailable'; }
+  }
+  function gathering(pc) {
+    if(pc.iceGatheringState==='complete')return Promise.resolve();
+    return new Promise((resolve,reject)=>{
+      let done=false;
+      const cleanup=()=>{clearTimeout(timer);pc.removeEventListener('icegatheringstatechange',check);};
+      const check=()=>{if(!done&&pc.iceGatheringState==='complete'){done=true;cleanup();resolve();}};
+      const timer=setTimeout(()=>{if(done)return;done=true;cleanup();reject(new Error('ICE gathering timeout'));},15000);
+      pc.addEventListener('icegatheringstatechange',check);
+      check();
+    });
+  }
+  async function run() {
+    const button=byId('start');
+    button.disabled=true;
+    byId('status').dataset.result='';
+    byId('status').textContent=msg('テスト中…','Running test…');
+    byId('details').textContent=msg('この端末内で接続を確立しています。','Connecting two peers on this device.');
+    let host=null,join=null,passed=false,error=null;
+    try {
+      if(typeof RTCPeerConnection!=='function')throw new Error('RTCPeerConnection unavailable');
+      host=new RTCPeerConnection({iceServers:[]});
+      join=new RTCPeerConnection({iceServers:[]});
+      let gotPong;
+      const pong=new Promise(resolve=>{gotPong=resolve;});
+      join.ondatachannel=e=>{
+        e.channel.onmessage=event=>{
+          if(event.data==='bk-test-ping'&&e.channel.readyState==='open')e.channel.send('bk-test-pong');
+        };
+      };
+      const control=host.createDataChannel('control',{ordered:true});
+      control.onopen=()=>{control.send('bk-test-ping');};
+      control.onmessage=event=>{if(event.data==='bk-test-pong')gotPong();};
+      await host.setLocalDescription(await host.createOffer());
+      await gathering(host);
+      await join.setRemoteDescription(host.localDescription);
+      await join.setLocalDescription(await join.createAnswer());
+      await gathering(join);
+      await host.setRemoteDescription(join.localDescription);
+      await Promise.race([pong,new Promise((_,reject)=>setTimeout(()=>reject(new Error('DataChannel response timeout')),12000))]);
+      passed=true;
+    } catch(e) {
+      error=e instanceof Error?e.message:String(e);
+    }
+    const report=[
+      msg('結果: ','Result: ')+(passed?msg('成功','PASS'):msg('失敗','FAIL')),
+      msg('ブラウザー: ','Browser: ')+navigator.userAgent.replace(/[0-9]+(?:\.[0-9]+){1,}/g,'x'),
+      msg('ホスト側: ','Host: ')+(host?('ICE='+host.iceConnectionState+', peer='+host.connectionState+', candidates='+summary(host)):'unavailable'),
+      msg('相手側: ','Remote: ')+(join?('ICE='+join.iceConnectionState+', peer='+join.connectionState+', candidates='+summary(join)):'unavailable'),
+      msg('ホスト側疎通: ','Host connectivity: ')+(host?await pairStats(host):'unavailable'),
+      msg('相手側疎通: ','Remote connectivity: ')+(join?await pairStats(join):'unavailable')
+    ];
+    if(error)report.push('Error: '+error);
+    report.push('',passed?msg(
+      '端末内のWebRTC通信は成功しました。PCとスマホ間の通信経路やQR交換が正常とは限りません。',
+      'Same-device WebRTC works. This does NOT verify the PC-to-phone network path or QR signaling.'
+    ):msg(
+      '端末内でも通信できません。ブラウザーや端末側のWebRTC制限が疑われます。',
+      'This browser cannot complete even a same-device WebRTC exchange. Check browser/device restrictions.'
+    ));
+    byId('status').dataset.result=passed?'success':'failure';
+    byId('status').textContent=passed?msg('成功：この端末内で通信できました','PASS: same-device connection works'):msg('失敗：この端末内で通信できません','FAIL: same-device connection failed');
+    byId('details').textContent=report.join('\n');
+    try{host&&host.close();}catch{}
+    try{join&&join.close();}catch{}
+    button.disabled=false;
+    button.textContent=msg('もう一度テスト','Run again');
+  }
+  byId('start').addEventListener('click',()=>{void run();});
+})();
+</script>
+</body>
+</html>
