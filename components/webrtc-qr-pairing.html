@@ -417,6 +417,12 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
       pc.addEventListener('iceconnectionstatechange',()=>{if(!guard())return;void updateDiagnostics(role,pc);if(pc.iceConnectionState==='failed')void handleConnectionState(role,'failed',pc,attempt);});
       pc.addEventListener('connectionstatechange',()=>{if(!guard())return;void updateDiagnostics(role,pc);void handleConnectionState(role,pc.connectionState,pc,attempt);});
       const api={ role, pc, createDataChannel(label,init){const ch=pc.createDataChannel(label,init);bindChannel(role,ch,pc,attempt);return ch;}, bindChannel(ch){bindChannel(role,ch,pc,attempt);} };
+      // Create the control channel before optional pointer/preview channels (v1.0.0 order).
+      // This also lets the reusable pairing component own the default channel.
+      if(role==='host'&&options.createDefaultChannel!==false){
+        const ch=api.createDataChannel(options.dataChannelLabel,options.dataChannelInit);
+        state.host.channel=ch;
+      }
       if(typeof options.onPeerCreated==='function')options.onPeerCreated(api);
       startDiagnosticPolling(role,pc,attempt);
       return pc;
@@ -426,14 +432,14 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
       const current=()=>isCurrentPc(role,pc,attempt);
       if(!current()){try{channel.close();}catch{}return;}
       if(!bucket.channel&&channel.label===options.dataChannelLabel)bucket.channel=channel;
-      channel.addEventListener('open',()=>{if(!current()){try{channel.close();}catch{}return;}if(!bucket.channel)bucket.channel=channel;if(typeof options.onChannel==='function')options.onChannel({role,pc,channel});if(pc.connectionState==='connected')markConnected(role,pc,attempt);});
+      channel.addEventListener('open',()=>{if(!current()){try{channel.close();}catch{}return;}if(!bucket.channel&&(options.createDefaultChannel===false||channel.label===options.dataChannelLabel))bucket.channel=channel;if(typeof options.onChannel==='function')options.onChannel({role,pc,channel});if(pc.connectionState==='connected')markConnected(role,pc,attempt);});
       channel.addEventListener('message',event=>{if(current()&&typeof options.onMessage==='function')options.onMessage({role,pc,channel,data:event.data,event});});
       channel.addEventListener('close',()=>{if(current()&&bucket.channel===channel)bucket.channel=null;});
     }
     function markConnected(role, pc, attempt) {
       if(!isCurrentPc(role,pc,attempt))return;
       const bucket=state[role];
-      if(options.createDefaultChannel!==false&&(!bucket.channel||bucket.channel.readyState!=='open'))return;
+      if(options.createDefaultChannel!==false&&(!bucket.channel||bucket.channel.label!==options.dataChannelLabel||bucket.channel.readyState!=='open'))return;
       if(bucket.everConnected)return;
       bucket.everConnected=true;stopDiagnosticPolling(role);state.connected=true;setStep(role,3);setStatus(role,t('connected'),'active');q(`[data-connected="${role}"]`).hidden=false;setCoach(role,role==='host'?'checking':'answer');q('[data-fullscreen]').hidden=true;emitState(role,'connected',{pc,channel:bucket.channel});if(typeof options.onConnected==='function')options.onConnected({role,pc,channel:bucket.channel});stopScanner();stopQrCycles();
     }
@@ -460,7 +466,7 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
       let pc=null;
       try {
         pc=createPeer('host',attempt);state.host.pc=pc;
-        if(options.createDefaultChannel!==false){const ch=pc.createDataChannel(options.dataChannelLabel,options.dataChannelInit);state.host.channel=ch;bindChannel('host',ch,pc,attempt);}
+        
         await pc.setLocalDescription(await pc.createOffer());setStatus('host',t('waitingIce'),'warning');await updateDiagnostics('host',pc);await waitForIceComplete('host',pc);if(!isCurrentPc('host',pc,attempt))return;if(summarizeIce(pc.localDescription?.sdp).count===0)throw iceError('ICE_NO_LOCAL_CANDIDATES');state.host.offerCode=await encodeSignal(pc.localDescription);q('[data-host-offer-code]').value=state.host.offerCode;q('[data-action="host-copy"]').disabled=false;q('[data-action="host-scan-answer"]').disabled=false;setStatus('host',t('offerReady'),'active');setStep('host',2);setCoach('host','offer');state.qr.hostPages=makeTransferPages(state.host.offerCode);state.qr.hostIndex=0;await showQr('host');startQrCycle('host');emitState('host','offer-ready',{pc});
       } catch(error) {
         if(pc&&!isCurrentPc('host',pc,attempt))return;const message=iceMessage(error);if(pc)await updateDiagnostics('host',pc,{warning:true,note:message});setStatus('host',message,'warning');setCoach('host','failed');emitState('host','offer-failed',{error});notify(message,'warning');closePc('host');
