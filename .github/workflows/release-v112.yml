@@ -90,20 +90,21 @@ jobs:
           Copy-Item 'dist/index.html' $readable
           Copy-Item 'dist/index.self-extract.html' $extract
 
-          foreach ($pair in @(
-            @('dist/index.html', 'index.html'),
-            @('dist/index.self-extract.html', 'index.self-extract.html'),
-            @('dist/dependency-manifest.json', 'dependency-manifest.json'),
-            @('dist/self-extract-manifest.json', 'self-extract-manifest.json'),
-            @('app.config.json', 'app.config.json'),
-            @('README.md', 'README.md'),
-            @('README.ja.md', 'README.ja.md'),
-            @('CHANGELOG.md', 'CHANGELOG.md'),
-            @('README-FIRST.txt', 'README-FIRST.txt'),
-            @('LICENSE', 'LICENSE'),
-            @('THIRD_PARTY_NOTICES.md', 'THIRD_PARTY_NOTICES.md')
-          )) {
-            Copy-Item -LiteralPath $pair[0] -Destination (Join-Path $stage $pair[1])
+          $packageFiles = @{
+            'index.html' = 'dist/index.html'
+            'index.self-extract.html' = 'dist/index.self-extract.html'
+            'dependency-manifest.json' = 'dist/dependency-manifest.json'
+            'self-extract-manifest.json' = 'dist/self-extract-manifest.json'
+            'app.config.json' = 'app.config.json'
+            'README.md' = 'README.md'
+            'README.ja.md' = 'README.ja.md'
+            'CHANGELOG.md' = 'CHANGELOG.md'
+            'README-FIRST.txt' = 'README-FIRST.txt'
+            'LICENSE' = 'LICENSE'
+            'THIRD_PARTY_NOTICES.md' = 'THIRD_PARTY_NOTICES.md'
+          }
+          foreach ($destName in $packageFiles.Keys) {
+            Copy-Item -LiteralPath $packageFiles[$destName] -Destination (Join-Path $stage $destName)
           }
           if (Test-Path -LiteralPath 'dist/build-size-report.json') {
             Copy-Item -LiteralPath 'dist/build-size-report.json' -Destination (Join-Path $stage 'build-size-report.json')
