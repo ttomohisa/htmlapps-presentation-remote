@@ -90,6 +90,11 @@ jobs:
         }
         Copy-Item -LiteralPath $reference -Destination "dist/v100.html"
         Write-Host "Historical baseline staged as /v100.html for same-origin A/B testing."
+    - name: Stage WebRTC self-test in preview only
+      shell: pwsh
+      run: |
+        Copy-Item -LiteralPath "scripts/webrtc-local-self-test.html" -Destination "dist/webrtc-self-test.html"
+        Write-Host "WebRTC self-test staged as /webrtc-self-test.html; not included in standalone release."
     - name: Upload static preview site
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
       with:
