@@ -6,6 +6,8 @@
 
 [日本語版 README](README.ja.md)
 
+Current release: **v1.1.2**. See [CHANGELOG.md](CHANGELOG.md) for release changes.
+
 A browser-based presentation tool that opens a local PPTX or PDF on your computer and lets you control it from a phone over direct WebRTC. The source presentation is not uploaded to a server.
 
 ## 🚀 Live demo

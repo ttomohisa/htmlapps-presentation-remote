@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.2 - 2026-10-29
+
+- Make the PC/phone QR-pairing screens easier to follow, with clearer roles and step-by-step guidance in Japanese and English.
+- Collapse advanced connection diagnostics by default and show practical checks when pairing fails, including Chrome's Nearby devices permission on supported Android 17 devices.
+- Simplify the Japanese and English opening descriptions for general users.
+- Keep the existing direct WebRTC connection and locally processed PPTX/PDF flow. The v1.1.2 UI change does not introduce a signaling server or file upload.
+
 ## 1.1.1
 
 - Verify the complete current header version at narrow phone widths; reserve space for the version beside truncated app titles.
