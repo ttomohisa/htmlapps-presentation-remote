@@ -49,7 +49,7 @@ This is not a “connect across any network” WebRTC helper. It prioritizes a f
 - Cleanup of old PeerConnections, DataChannels, camera tracks, and timers
 - **Do not create the joining-side Answer immediately after reading the Offer**
 - Prepare the host reply scanner first, then create the Answer
-- Automatically regenerate the joining-side Answer up to three times after pre-connect ICE failure
+- Invalidate the reply QR on pre-connect failure and restart from a fresh host Offer; never silently replace an Answer generation
 - DataChannel callbacks for the application
 
 ## Embedded dependencies
@@ -123,7 +123,7 @@ await pairing.startJoin();
 5. Once the host camera preview is visible, the user presses “create reply QR”.
 6. Only now create the PeerConnection, Answer, and local ICE candidates.
 7. Show the completed Answer QR to the host camera.
-8. If ICE fails before the host applies the Answer, create a fresh PeerConnection and Answer QR automatically.
+8. If ICE fails before connection, invalidate the displayed Answer QR and manual code. Recreate the Offer on the host and scan it on the joining device to restart from the beginning.
 
 Delaying Answer creation is intentional. In manual QR signaling, starting ICE before the user has prepared the host camera can leave a several-second gap in which the joining side reaches `failed` before the Answer is delivered.
 
@@ -150,7 +150,6 @@ pairing.destroy();
 | --- | --- | --- |
 | `language` | `'ja'` | `'ja'` or `'en'` |
 | `iceGatherTimeoutMs` | `15000` | Maximum wait for complete ICE gathering |
-| `answerAutoRetryLimit` | `3` | Pre-connect Answer regeneration attempts |
 | `qrChunkSize` | `175` | Characters per QR page |
 | `payloadPrefix` | `'bkrtc1'` | Signal-code namespace |
 | `qrPrefix` | `'bkrtcq1'` | Chunked-QR namespace |
@@ -269,8 +268,9 @@ Diagnostics refresh about once per second while ICE is checking and stop polling
 - Stop QR timers.
 - Stop camera tracks.
 - Guard asynchronous work with an attempt identity so an old error cannot overwrite a newer UI.
-- Joining-side automatic Answer regeneration uses the retained Offer but a fresh PeerConnection and new QR session.
-- Stop automatic regeneration at the configured limit and return control to the user.
+- Invalidate the Answer QR and copy code after a pre-connect failure; do not silently regenerate it.
+- Invalidate a failed host Offer too. Both devices restart using a fresh Offer.
+- Guard late asynchronous QR rendering so expired QR pages cannot reappear.
 - A host-side route failure normally starts again with a fresh Offer.
 
 ## CSP and privacy copy
@@ -306,7 +306,7 @@ At minimum, test on real devices:
 4. Read the reply QR with a 480p/720p-class laptop camera.
 5. Confirm slow human QR handoff does not itself time out.
 6. Change roles during ICE gathering and confirm stale errors do not overwrite the new attempt.
-7. Trigger a pre-connect failure and confirm the joining-side Answer QR refreshes.
+7. Trigger a pre-connect failure and confirm the old Answer QR is invalidated and pairing restarts from a fresh host Offer.
 8. Force failure with a VPN / guest network and inspect the diagnostics.
 9. Deny camera permission and confirm the manual code path still works.
 10. Inspect DevTools and confirm no runtime CDN/API request is made.
