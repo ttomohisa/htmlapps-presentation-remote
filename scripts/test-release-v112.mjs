@@ -22,6 +22,11 @@ assert.ok(workflow.includes('--target "$env:GITHUB_SHA"'));
 assert.ok(workflow.includes('branches:\n      - main'));
 assert.ok(workflow.includes('contents: write'));
 assert.ok(workflow.includes('SHA256SUMS.txt'));
+assert.ok(workflow.includes('./scripts/package-release-v112.ps1'));
+const packageScript=readFileSync('scripts/package-release-v112.ps1','utf8');
+assert.ok(packageScript.includes('Compress-Archive'));
+assert.ok(packageScript.includes('Get-FileHash'));
+assert.ok(packageScript.includes('htmlapps-presentation-remote-v1.1.2.zip'));
 for(const required of ['パソコンで開いたスライドをスマホで操作','PowerPointやPDFに対応。','Nearby devices','付近のデバイス']) {
   assert.ok(source.includes(required),'Missing introduction or permission detail: '+required);
 }
