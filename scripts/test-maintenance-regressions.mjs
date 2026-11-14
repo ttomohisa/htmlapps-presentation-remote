@@ -14,8 +14,9 @@ function run(line,context){
  vm.runInContext(line,c);
  return c;
 }
-test('footer is centered on desktop, and small-screen visibility rules remain intact',()=>{
- assert.match(source,/footer\{[^}]*text-align:center;/);
+test('footer aligns to the header content edge, and small-screen visibility remains intact',()=>{
+ assert.match(source,/\.header-inner\{width:min\(1420px,100%\);[^}]*padding:10px clamp\(14px,2\.4vw,28px\);/);
+ assert.match(source,/footer\{width:min\(1420px,100%\);margin:0 auto;padding:20px clamp\(14px,2\.4vw,28px\) 30px;text-align:left;/);
  assert.match(source,/@media \(max-width:720px\), \(max-height:560px\).*?body > footer \{ display: none; \}/);
 });
 test('first-use notes font keeps its intended 13px size',()=>{
