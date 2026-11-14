@@ -51,7 +51,7 @@ function Assert-Scenario([string]$scenario, [string]$expectation, [string]$fragm
   $result = $null
   $errorText = ''
   try {
-    $result = @(& (Join-Path $root 'scripts/verify-release-state.ps1') -DryRun)
+    $result = @(& (Join-Path $root 'scripts/verify-release-state.ps1') -DryRun 6>&1)
   } catch {
     $errorText = [string]$_.Exception.Message
   }
