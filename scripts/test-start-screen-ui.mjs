@@ -11,7 +11,12 @@ assert.match(app,/QRで接続します。<\/p>/);
 assert.doesNotMatch(app,/privacyBadge:|class="privacy-badge"|data-i18n="privacyBadge"/);
 assert.match(app,/state\.file=file;\$\('#introSection'\)\.hidden=true;\$\('#startView'\)\.hidden=true;/);
 assert.match(app,/state\.phase='error';\$\('#loadStatus'\)\.hidden=true;\$\('#introSection'\)\.hidden=false;/);
-assert.match(app,/<details id="compatDetails" class="compat-details"><summary>/);
+assert.match(app,/<div class="compat-inline"><details id="compatDetails" class="compat-details"><summary>/);
+assert.doesNotMatch(app,/compat-card/,'no compatibility card remains on mobile or desktop');
+assert.match(app,/\.compat-inline\{margin:8px 0 0;padding:2px 4px 0;min-width:0\}/,'unboxed compatibility row');
+const center=app.slice(app.indexOf('<div class="center-column">'),app.indexOf('<aside class="side-column">'));
+assert.ok(center.indexOf('class="nav-bar"')<center.indexOf('class="compat-inline"'),'compatibility lives below the stage navigation');
+assert.ok(center.includes('id="compatSummary"'),'disclosure moved with its full summary');
 assert.match(app,/id="compatWarning"[^>]+hidden/);
 assert.match(app,/\$\('#compatDetails'\)\.open=false/);
 assert.match(app,/\$\('#compatWarning'\)\.hidden=\!\(hasWarnings\|\|fallback\)/);
@@ -27,4 +32,4 @@ for(const src of [app,pairing]){
  assert.match(src,/joinCoachScanBody:'Aim at the PC QR. It scans automatically.'/);
  assert.equal((src.match(/class="app-webrtc-button small app-webrtc-role-switch"/g)||[]).length,2);
 }
-console.log('Intro visibility, compatibility and QR panel layout contracts passed.');
+console.log('Intro visibility, unboxed compatibility placement and QR layout contracts passed.');
