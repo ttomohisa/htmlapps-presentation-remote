@@ -81,4 +81,5 @@ try {
   Remove-Variable -Name releaseGuardScenario -Scope Global -ErrorAction SilentlyContinue
   $env:GITHUB_REPOSITORY = $oldRepo
   $env:GH_TOKEN = $oldToken
+  $global:LASTEXITCODE = 0
 }
