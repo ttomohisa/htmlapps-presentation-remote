@@ -49,6 +49,9 @@ test('PDF window resize and fullscreen use throttled PDF redrawing',()=>{
  assert.match(source,/window\.addEventListener\('resize',\(\)=>\{schedulePptxRefit\(\);schedulePdfRefit\(\)\}\)/);
  assert.match(source,/document\.addEventListener\('fullscreenchange',\(\)=>\{if\(state\.phase==='ready'&&state\.kind==='pdf'\)schedulePdfRefit\(\)/);
 });
+test('scanner remains active while a replacement camera is acquiring permission',()=>{
+ assert.ok(pairing.includes('if(!state.scanner.stream){state.scanner.frame=requestAnimationFrame(tick);return;}'));
+});
 test('camera request is cancelled after scanner is closed while permission is pending',async()=>{
  let resolve,stopped=0;
  const scanner={generation:7,cameraRequestId:0,mode:'join',stream:null};
