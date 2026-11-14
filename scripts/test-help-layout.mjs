@@ -81,7 +81,8 @@ test('actual Help handlers support repeated open, Close and backdrop dismissal',
 test('Help gives beginners a complete five-step pairing flow without dismissal instructions',()=>{
  const begin=source.indexOf('const T={'),end=source.indexOf('const $=',begin);
  const translations=vm.runInNewContext(source.slice(begin,end)+'\nT');
- const section=source.slice(source.indexOf('<dialog id="helpDialog">'),source.indexOf('</dialog>')+9);
+ const dialogStart=source.indexOf('<dialog id="helpDialog">');
+ const section=source.slice(dialogStart,source.indexOf('</dialog>',dialogStart)+9);
  const stepTitles=[...section.matchAll(/data-i18n="helpStep(\\d)Title"/g)].map(match=>Number(match[1]));
  assert.deepEqual(stepTitles,[1,2,3,4,5]);
  assert.equal((section.match(/class="help-more"/g)||[]).length,2,'optional details stay collapsed initially');
