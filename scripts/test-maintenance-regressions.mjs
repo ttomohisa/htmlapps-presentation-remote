@@ -7,7 +7,7 @@ const source=fs.readFileSync(new URL('../src/index.template.html',import.meta.ur
 const pairing=fs.readFileSync(new URL('../components/webrtc-qr-pairing.html',import.meta.url),'utf8');
 function oneLine(name,text=source){
  const line=text.split('\n').find(line=>new RegExp('^\\s*(?:async )?function '+name+'\\(').test(line));
- assert.ok(line, name+' exists');return line;
+ assert.ok(line, name+' exists');if(name==='openCamera'){const start=text.indexOf(line),end=text.indexOf('\n    function renderChunks(',start);assert.ok(end>start,'camera function boundary');return text.slice(start,end);}return line;
 }
 function run(line,context){
  const c=vm.createContext(context);
