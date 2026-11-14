@@ -44,6 +44,15 @@ await assertHeaderVersionFits(page, width, height, label);
  assert.ok(await page.locator('.privacy-badge').isVisible(),label+': badge visible');
  const phone=width<=cfg.bp||(cfg.slug==='presentation-remote'&&width>height&&height<=560&&width<=1000);
  assert.equal(await page.locator('body > footer').isVisible(),!phone,label+': footer');
+ if(!phone){
+   const edges=await page.evaluate(()=>{
+     const header=document.querySelector('.header-inner'),footer=document.querySelector('body > footer');
+     const hr=header.getBoundingClientRect(),fr=footer.getBoundingClientRect();
+     return {headerLeft:hr.left+parseFloat(getComputedStyle(header).paddingLeft),
+       footerLeft:fr.left+parseFloat(getComputedStyle(footer).paddingLeft)};
+   });
+   assert.ok(Math.abs(edges.headerLeft-edges.footerLeft)<=1,label+': footer text aligns with header content edge '+JSON.stringify(edges));
+ }
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),label+': page width');
  if(cfg.slug==='markdown-preview-lab')assert.equal(await page.locator('.mobile-view-switch').isVisible(),width<=720,label+': workflow switch');
  if(cfg.slug==='smart-image-sorter')assert.equal(await page.locator('.mobile-bottom-bar').isVisible(),width<=600,label+': existing navigation breakpoint');
