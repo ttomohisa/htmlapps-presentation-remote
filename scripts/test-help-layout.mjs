@@ -83,7 +83,7 @@ test('Help gives beginners a complete five-step pairing flow without dismissal i
  const translations=vm.runInNewContext(source.slice(begin,end)+'\nT');
  const dialogStart=source.indexOf('<dialog id="helpDialog">');
  const section=source.slice(dialogStart,source.indexOf('</dialog>',dialogStart)+9);
- const stepTitles=[...section.matchAll(/data-i18n="helpStep(\\d)Title"/g)].map(match=>Number(match[1]));
+ const stepTitles=[...section.matchAll(/data-i18n="helpStep(\d)Title"/g)].map(match=>Number(match[1]));
  assert.deepEqual(stepTitles,[1,2,3,4,5]);
  assert.equal((section.match(/class="help-more"/g)||[]).length,2,'optional details stay collapsed initially');
  assert.doesNotMatch(section,/data-i18n="helpDialogScroll"/);
