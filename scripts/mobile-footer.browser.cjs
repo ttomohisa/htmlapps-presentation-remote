@@ -2,7 +2,7 @@
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {pathToFileURL}=require('node:url'),{chromium}=require('playwright');
-const cfg={"slug": "presentation-remote", "bp": 720, "end": "[data-i18n=\"helpFullscreenLimit\"]", "badge": "privacyBadge", "header": ".dialog-head", "close": "#closeHelpButton"};
+const cfg={"slug": "presentation-remote", "bp": 720, "end": "[data-i18n=\"helpFullscreenLimit\"]", "header": ".dialog-head", "close": "#closeHelpButton"};
 const evidence=path.resolve('test-results/mobile-footer');
 
 async function assertHeaderVersionFits(page, width, height, label) {
@@ -37,11 +37,10 @@ async function main(){
  await page.locator('#helpButton').waitFor();
  if(await page.locator('html').getAttribute('lang')!==language)await page.locator('#languageButton').click();
 await assertHeaderVersionFits(page, width, height, label);
- const badge=page.locator('[data-i18n="'+cfg.badge+'"]');
- assert.equal((await badge.textContent()).trim(),cfg.slug==='presentation-remote'?(language==='ja'?'資料のアップロードなし':'The deck is not uploaded'):(language==='ja'?'完全ローカル処理':'Fully local processing'));
- assert.equal(await page.locator('.privacy-badge').count(),1,label+': retain one badge');
- assert.match(await page.locator('.privacy-badge svg path').first().getAttribute('d'),/^M12 3 /,label+': retain shield');
- assert.ok(await page.locator('.privacy-badge').isVisible(),label+': badge visible');
+ assert.equal(await page.locator('.privacy-badge').count(),0,label+': redundant privacy badge removed');
+ assert.ok(await page.locator('#introSection').isVisible(),label+': introduction visible before loading a deck');
+ assert.equal((await page.locator('#introSection h1').textContent()).trim(),language==='ja'?'スライドをスマホで操作':'Control slides from your phone',label+': short introduction title');
+ assert.ok((await page.locator('#introSection p').textContent()).length<140,label+': concise feature explanation');
  const phone=width<=cfg.bp||(cfg.slug==='presentation-remote'&&width>height&&height<=560&&width<=1000);
  assert.equal(await page.locator('body > footer').isVisible(),!phone,label+': footer');
  if(!phone){
