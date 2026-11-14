@@ -79,8 +79,8 @@ for(const lang of ['en','ja']){
   }
  });
  test(`${lang}: WebRTC privacy copy preserves the real peer-transfer boundary`,()=>{
-  const h=harness(lang),badge=h.copy(presentation?'privacyBadge':'localBadge'),help=h.copy('helpPrivacyBody');
-  assert.equal(badge,presentation?(lang==='ja'?'資料のアップロードなし':'The deck is not uploaded'):(lang==='ja'?'シグナリング / STUN / TURN 不使用':'No signaling / STUN / TURN servers'));
+  const h=harness(lang),help=h.copy('helpPrivacyBody');
+  assert.equal(h.copy('privacyBadge'),undefined,'redundant privacy badge is not part of the landing screen');
   assert.match(help,/WebRTC/);assert.match(help,/STUN/);assert.match(help,/TURN/);
   if(presentation){assert.match(help,lang==='ja'?/低解像度プレビュー/:/low-resolution current\/next slide previews/);assert.match(help,lang==='ja'?/発表者ノート/:/speaker notes/);assert.match(help,lang==='ja'?/操作情報/:/control data/)}
   else assert.match(help,lang==='ja'?/接続相手へ直接/:/directly to the peer/);
