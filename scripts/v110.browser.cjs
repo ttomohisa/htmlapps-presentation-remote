@@ -37,6 +37,22 @@ async function pageIn(viewport){const c=await browser.newContext({viewport,local
  await host.waitForFunction(()=>document.querySelector('#slideNumber').value==='1');
  await host.locator('#compatDetails > summary').click();
  await pass('unboxed compatibility placement and slide-link navigation in desktop presenter');
+ // Between mobile and wide-desktop breakpoints, both control cards must fill the entire row.
+ for(const width of [721,800,900,1040]){
+  await host.setViewportSize({width,height:900});
+  const layout=await host.evaluate(()=>{
+   const side=document.querySelector('.side-column'),cards=[...side.querySelectorAll(':scope > .side-card')];
+   const box=side.getBoundingClientRect(),first=cards[0].getBoundingClientRect(),last=cards[1].getBoundingClientRect();
+   return {sideLeft:box.left,sideRight:box.right,firstLeft:first.left,firstRight:first.right,secondLeft:last.left,secondRight:last.right,firstTop:first.top,secondTop:last.top,columnCount:getComputedStyle(side).gridTemplateColumns.split(' ').length,scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth};
+  });
+  assert.equal(layout.columnCount,2,'exactly two mid-width control columns: '+JSON.stringify(layout));
+  assert.ok(Math.abs(layout.firstLeft-layout.sideLeft)<2&&Math.abs(layout.secondRight-layout.sideRight)<2,'controls occupy both ends of the row: '+JSON.stringify(layout));
+  assert.ok(layout.secondLeft>layout.firstRight&&Math.abs(layout.firstTop-layout.secondTop)<2,'cards are side-by-side: '+JSON.stringify(layout));
+  assert.ok(layout.scrollWidth<=layout.viewport,'no horizontal overflow: '+JSON.stringify(layout));
+  if(width===800)await host.screenshot({path:path.join(out,'presenter-800-controls-filled.png')});
+ }
+ await host.setViewportSize({width:1360,height:900});
+ await pass('721–1040px presenter uses two full-width control columns with no empty third slot');
  await pass('loaded deck hides intro and starts with compatibility details collapsed');
  const narrowDeck=await pageIn({width:320,height:640});
  await narrowDeck.locator('#fileInput').setInputFiles(pdf);
