@@ -38,7 +38,7 @@ assert.ok(packager.includes('"htmlapps-presentation-remote-v$version.zip"'));
 assert.ok(ci.includes('scripts/package-release.ps1'));
 assert.ok(ci.includes('scripts/verify-release-state.ps1'));
 assert.ok(!workflow.includes('v1.1.2'));
-for(const required of ['パソコンで開いたスライドをスマホで操作','PowerPointやPDFに対応。','Nearby devices','付近のデバイス']) {
+for(const required of ['スライドをスマホで操作','パソコンでPPTX / PDFを開き','Nearby devices','付近のデバイス']) {
   assert.ok(source.includes(required),'Missing introduction or permission detail: '+required);
 }
 console.log('Version-independent release metadata and workflow checks passed.');
