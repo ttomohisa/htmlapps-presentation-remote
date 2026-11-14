@@ -21,14 +21,14 @@ test('footer aligns to the header content edge, and small-screen visibility rema
 });
 test('first-use notes font keeps its intended 13px size',()=>{
  const state={remoteUi:{hapticsSupported:false,haptics:true,presenterView:true,notesFontSize:13}};
- const c=run(oneLine('initRemotePreferences'),{state,localStorage:{getItem:()=>null},navigator:{},$:()=>null,renderNotesControls(){},renderWakeLockUi(){},initMotionPreferences(){},tr:x=>x});
+ const c=run(oneLine('initRemotePreferences'),{state,APP_CONFIG:{slug:'presentation-remote'},localStorage:{getItem:()=>null},navigator:{},$:()=>null,renderNotesControls(){},renderWakeLockUi(){},initMotionPreferences(){},tr:x=>x});
  c.initRemotePreferences();
  assert.equal(state.remoteUi.notesFontSize,13);
 });
 test('first-use motion settings keep sensitivity 1 and deadzone 0.6',()=>{
  const motion={sensitivity:1,deadzone:.6,smoothing:'standard'};
  const state={remoteUi:{motion}};
- const c=run(oneLine('initMotionPreferences'),{state,window:{DeviceOrientationEvent:function(){},isSecureContext:true},localStorage:{getItem:()=>null},$:()=>null,renderMotionUi(){}});
+ const c=run(oneLine('initMotionPreferences'),{state,APP_CONFIG:{slug:'presentation-remote'},window:{DeviceOrientationEvent:function(){},isSecureContext:true},localStorage:{getItem:()=>null},$:()=>null,renderMotionUi(){}});
  c.initMotionPreferences();assert.equal(motion.deadzone,.6);assert.equal(motion.sensitivity,1);
 });
 test('missing device-orientation angles cannot be calibrated as zeros',()=>{
