@@ -19,8 +19,29 @@ $releases = @(gh api "repos/$env:GITHUB_REPOSITORY/releases?per_page=100" --jq '
 if ($LASTEXITCODE -ne 0) { throw 'Failed to list GitHub releases; refusing to publish.' }
 $publish = 'true'
 if ($releases -contains $tag) {
+  # A rerun must not turn an incomplete public release into an apparently successful job.
+  $releaseText = gh api "repos/$env:GITHUB_REPOSITORY/releases/tags/$tag"
+  if ($LASTEXITCODE -ne 0) { throw "Cannot inspect existing release $tag; refusing to skip validation." }
+  $release = $releaseText | ConvertFrom-Json
+  if ($release.draft) { throw "Release $tag is still a draft; inspect the incomplete release before retrying." }
+  $expectedAssets = @(
+    "htmlapps-presentation-remote-v$version.html",
+    "htmlapps-presentation-remote-v$version.self-extract.html",
+    "htmlapps-presentation-remote-v$version.zip",
+    'SHA256SUMS.txt'
+  )
+  foreach ($name in $expectedAssets) {
+    $found = @($release.assets | Where-Object { $_.name -eq $name -and [long]$_.size -gt 0 })
+    if ($found.Count -ne 1) {
+      throw "Existing release $tag is missing or has an empty asset: $name. Repair it before retrying."
+    }
+  }
+  $refText = gh api "repos/$env:GITHUB_REPOSITORY/git/ref/tags/$tag"
+  if ($LASTEXITCODE -ne 0) { throw "Published release $tag has no readable tag reference." }
+  $tagRef = $refText | ConvertFrom-Json
+  if (-not $tagRef.object.sha) { throw "Published release $tag has an invalid tag reference." }
   $publish = 'false'
-  Write-Host "Release $tag already exists. Leaving it unchanged."
+  Write-Host "Release $tag already has its tag and all four nonempty assets. Leaving it unchanged."
 } else {
   $refs = @(gh api "repos/$env:GITHUB_REPOSITORY/git/refs/tags?per_page=100" --jq '.[].ref')
   if ($LASTEXITCODE -ne 0) { throw 'Failed to list Git tags; refusing to publish.' }
