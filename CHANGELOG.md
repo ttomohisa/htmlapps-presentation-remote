@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.3 - 2026-11-15
+
+- Align the desktop footer with the header content edge, retaining the existing mobile footer hiding.
+- Preserve the intended motion-pointer dead-zone and speaker-note font defaults on first use; reject missing orientation sensor values.
+- Cancel stale QR camera initialization and scan callbacks after closing or changing cameras.
+- Refit PDF pages on window resizes, and recover the prior slide after a presentation render error.
+- Add regression cases and change automatic GitHub releases to versioned, reusable workflows.
+
 ## 1.1.2 - 2026-10-29
 
 - Make the PC/phone QR-pairing screens easier to follow, with clearer roles and step-by-step guidance in Japanese and English.
