@@ -35,7 +35,7 @@ async function pageIn(viewport){const c=await browser.newContext({viewport,local
  const scan=await pageIn({width:393,height:852});await scan.locator('#joinButton').click();await scan.locator('[data-scanner-panel="join"] video').waitFor({state:'visible'});await scan.waitForFunction(()=>document.querySelector('[data-scan-video="join"]').videoWidth>0);
  const geometry=[];for(const [width,height]of [[393,852],[852,393],[320,568]]){await scan.setViewportSize({width,height});await scan.locator('[data-scanner-panel="join"] video').scrollIntoViewIfNeeded();
  const pairingLayout=await scan.evaluate(()=>{
-   const button=document.querySelector('[data-action="join-scan-offer"]'),camera=document.querySelector('[data-scanner-panel="join"] .app-webrtc-scan'),role=document.querySelector('[data-action="chooser"]'),coach=document.querySelector('[data-coach-body="join"]');
+   const button=document.querySelector('[data-action="join-scan-offer"]'),camera=document.querySelector('[data-scanner-panel="join"] .app-webrtc-scan'),role=document.querySelector('[data-webrtc-view="join"] [data-action="chooser"]'),coach=document.querySelector('[data-coach-body="join"]');
    const btn=button.getBoundingClientRect(),cam=camera.getBoundingClientRect(),roleRect=role.getBoundingClientRect(),lineHeight=parseFloat(getComputedStyle(coach).lineHeight);
    return {cameraGap:cam.top-btn.bottom,roleWrap:getComputedStyle(role).whiteSpace,roleFits:role.scrollWidth<=role.clientWidth+1,roleInDialog:roleRect.right<=document.querySelector('#pairDialog').getBoundingClientRect().right+1,coachHeight:coach.getBoundingClientRect().height,lineHeight,coachText:coach.textContent};
  });
