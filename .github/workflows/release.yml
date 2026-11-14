@@ -30,6 +30,10 @@ jobs:
         with:
           node-version: 24
 
+      - name: Test release guard success and failure modes offline
+        shell: pwsh
+        run: ./scripts/test-release-guard.ps1
+
       - name: Check version and avoid duplicate releases
         id: guard
         shell: pwsh
