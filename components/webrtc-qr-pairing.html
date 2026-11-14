@@ -557,7 +557,7 @@ See docs/WEBRTC_QR_PAIRING.ja.md / docs/WEBRTC_QR_PAIRING.md.
         if(!await openCamera(role,'',generation)||!current())return;
         if(role==='host')els.progress.textContent=t('scanReady');
         const tick=async now=>{
-          if(!current()||!state.scanner.stream)return;
+          if(!current())return;if(!state.scanner.stream){state.scanner.frame=requestAnimationFrame(tick);return;}
           if(now-state.scanner.lastDecode>180){
             state.scanner.lastDecode=now;
             try{
