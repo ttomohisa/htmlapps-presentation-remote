@@ -78,18 +78,31 @@ test('actual Help handlers support repeated open, Close and backdrop dismissal',
  assert.equal(dialog.events.cancel,undefined,'native Escape cancellation is not intercepted by Help');
 });
 
-test('Japanese and English Help explain dismissal without implementation commentary or privacy changes',()=>{
+test('Help gives beginners a complete five-step pairing flow without dismissal instructions',()=>{
  const begin=source.indexOf('const T={'),end=source.indexOf('const $=',begin);
  const translations=vm.runInNewContext(source.slice(begin,end)+'\nT');
- assert.match(translations.ja.helpDialogScroll||'',/Esc/);
- assert.match(translations.ja.helpDialogScroll||'',/閉じる/);
- assert.match(translations.en.helpDialogScroll||'',/Esc/);
- assert.match(translations.en.helpDialogScroll||'',/Close/);
- const section=source.slice(source.indexOf('<!-- APP:HELP:BEGIN -->'),source.indexOf('<!-- APP:HELP:END -->'));
- assert.match(section,/data-i18n="helpDialogScroll"/,'new behavior is in the maintained Help section');
+ const section=source.slice(source.indexOf('<dialog id="helpDialog">'),source.indexOf('</dialog>')+9);
+ const stepTitles=[...section.matchAll(/data-i18n="helpStep(\\d)Title"/g)].map(match=>Number(match[1]));
+ assert.deepEqual(stepTitles,[1,2,3,4,5]);
+ assert.equal((section.match(/class="help-more"/g)||[]).length,2,'optional details stay collapsed initially');
+ assert.doesNotMatch(section,/data-i18n="helpDialogScroll"/);
+ assert.equal(source.includes('「閉じる」、Esc、ダイアログ外のクリックで閉じます。'),false);
+ assert.equal(source.includes('Close Help with Close, Esc, or a click outside the dialog.'),false);
  for(const language of ['ja','en']){
-  assert.match(translations[language].helpPrivacyBody,/WebRTC/);
-  assert.match(translations[language].helpPrivacyBody,/STUN/);
-  assert.match(translations[language].helpPrivacyBody,/TURN/);
+  const t=translations[language];
+  assert.equal(t.helpDialogScroll,undefined,'dismissal copy is not part of translations');
+  for(let i=1;i<=5;i++){
+   assert.ok(t['helpStep'+i+'Title'],'step '+i+' title in '+language);
+   assert.ok(t['helpStep'+i],'step '+i+' description in '+language);
+  }
+  for(const key of ['helpDuringTitle','helpPreviewBody','helpPointerBody','helpExtraTitle','helpTechnicalTitle','helpPptxDetail']){
+   assert.ok(t[key],key+' translated in '+language);
+  }
+  assert.match(t.helpPrivacyBody,/WebRTC/);
+  assert.match(t.helpPrivacyBody,/STUN/);
+  assert.match(t.helpPrivacyBody,/TURN/);
+  assert.match(t.helpRtcLimit,language==='ja'?/Wi-Fi/:/Wi-Fi/);
+  assert.match(t.helpStep4,language==='ja'?/返答QR/:/reply QR/i);
+  assert.match(t.helpStep5,language==='ja'?/プレゼン開始/:/Start presentation/);
  }
 });
