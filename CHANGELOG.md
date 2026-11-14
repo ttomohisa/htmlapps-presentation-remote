@@ -2,6 +2,8 @@
 
 ## 1.1.3 - 2026-11-15
 
+- Reorganize Japanese and English Help around five clear steps (including both QR scans), keep essential restrictions visible, and move advanced controls and rendering details into optional sections. Remove unnecessary Help dismissal instructions.
+
 - Align the desktop footer with the header content edge, retaining the existing mobile footer hiding.
 - Preserve the intended motion-pointer dead-zone and speaker-note font defaults on first use; reject missing orientation sensor values.
 - Cancel stale QR camera initialization and scan callbacks after closing or changing cameras.
