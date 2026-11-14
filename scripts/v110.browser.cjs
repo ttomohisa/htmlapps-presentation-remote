@@ -23,9 +23,37 @@ async function pageIn(viewport){const c=await browser.newContext({viewport,local
  assert.equal(await host.locator('#introSection').isVisible(),false,'intro hidden after opening PDF');
  assert.equal(await host.locator('#compatDetails').getAttribute('open'),null,'compatibility check collapsed by default');
  assert.equal(await host.locator('#compatWarning').isVisible(),false,'normal PDF has no warning');
+ const desktopLayout=await host.evaluate(()=>{
+  const compat=document.querySelector('.compat-inline'),nav=document.querySelector('.nav-bar'),right=document.querySelector('.side-column');
+  const rect=compat.getBoundingClientRect(),navRect=nav.getBoundingClientRect(),css=getComputedStyle(compat);
+  return {insideCenter:!!compat.closest('.center-column'),inSidebar:!!compat.closest('.side-column'),afterNav:rect.top>=navRect.bottom-1,borderWidth:css.borderTopWidth,cardCount:right.querySelectorAll(':scope > .card').length,compatCards:right.querySelectorAll('.compat-card').length};
+ });
+ assert.ok(desktopLayout.insideCenter&&!desktopLayout.inSidebar&&desktopLayout.afterNav&&desktopLayout.borderWidth==='0px'&&desktopLayout.cardCount===2&&desktopLayout.compatCards===0,'compatibility check lives unboxed beneath slide controls on desktop: '+JSON.stringify(desktopLayout));
  await host.locator('#compatDetails > summary').click();assert.equal(await host.locator('#compatSummary').isVisible(),true,'compatibility details accessible when expanded');
+ await host.evaluate(()=>{const link=document.createElement('button');link.type='button';link.className='compat-slide-jump';link.textContent='3';link.dataset.compatSlideIndex='2';document.querySelector('#compatSummary').append(link)});
+ await host.locator('#compatSummary [data-compat-slide-index="2"]').click();
+ await host.waitForFunction(()=>document.querySelector('#slideNumber').value==='3');
+ await host.locator('#slideNumber').fill('1');await host.locator('#slideNumber').dispatchEvent('change');
+ await host.waitForFunction(()=>document.querySelector('#slideNumber').value==='1');
  await host.locator('#compatDetails > summary').click();
- await pass('loaded deck hides intro and starts with compatibility details collapsed');await waitText(host,'#timerStatus','Not started');assert.equal(await host.locator('#timerText').textContent(),'00:00');
+ await pass('unboxed compatibility placement and slide-link navigation in desktop presenter');
+ await pass('loaded deck hides intro and starts with compatibility details collapsed');
+ const narrowDeck=await pageIn({width:320,height:640});
+ await narrowDeck.locator('#fileInput').setInputFiles(pdf);
+ await narrowDeck.locator('#presenterView').waitFor({state:'visible'});
+ await narrowDeck.locator('#slideSurface canvas').waitFor();
+ const narrowLayout=await narrowDeck.evaluate(()=>{
+  const compat=document.querySelector('.compat-inline'),nav=document.querySelector('.nav-bar'),css=getComputedStyle(compat);
+  return {inCenter:!!compat.closest('.center-column'),borderWidth:css.borderTopWidth,afterNav:compat.getBoundingClientRect().top>=nav.getBoundingClientRect().bottom-1,scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth};
+ });
+ assert.ok(narrowLayout.inCenter&&narrowLayout.borderWidth==='0px'&&narrowLayout.afterNav&&narrowLayout.scrollWidth<=narrowLayout.viewport,'mobile 320px compatibility layout: '+JSON.stringify(narrowLayout));
+ await narrowDeck.locator('#compatDetails > summary').click();
+ assert.equal(await narrowDeck.locator('#compatSummary').isVisible(),true);
+ assert.equal(await narrowDeck.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'expanded compatibility does not overflow phone width');
+ await narrowDeck.screenshot({path:path.join(out,'mobile-compat-unboxed.png')});
+ await narrowDeck.close();
+ await pass('mobile compatibility is unboxed without horizontal scrolling');
+ await waitText(host,'#timerStatus','Not started');assert.equal(await host.locator('#timerText').textContent(),'00:00');
  await host.locator('#connectPhoneButton').click();await host.waitForFunction(()=>document.querySelector('[data-host-offer-code]').value.length>100);
  const offer=await host.locator('[data-host-offer-code]').inputValue();await phone.locator('#joinButton').click();await phone.locator('[data-copy="manualOfferReceive"]').click();await phone.locator('[data-join-offer-input]').fill(offer);await phone.locator('[data-action="join-use-offer"]').click();await phone.locator('[data-action="join-create-answer"]').click();await phone.waitForFunction(()=>document.querySelector('[data-join-answer-code]').value.length>100);
  const answer=await phone.locator('[data-join-answer-code]').inputValue();await host.locator('[data-copy="manualAnswer"]').first().click();await host.locator('[data-host-answer-input]').fill(answer);await host.locator('[data-action="host-apply-answer"]').click();await phone.locator('#remoteNext').waitFor();await waitText(phone,'#remoteConnectionText','Connected');await host.locator('#pairDialog').waitFor({state:'hidden'});await phone.locator('#pairDialog').waitFor({state:'hidden'});await pass('real WebRTC manual offer/answer pairing; file load remains idle');
