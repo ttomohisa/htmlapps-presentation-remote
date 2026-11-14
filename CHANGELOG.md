@@ -2,6 +2,10 @@
 
 ## 1.1.3 - 2026-11-15
 
+- Keep the start-page introduction concise, hide it when a deck loads, and remove the redundant privacy badge without changing the privacy notice in Help.
+- Collapse compatibility details by default; show a warning label when PPTX compatibility needs attention.
+- Prevent the phone pairing role-switch button from wrapping, add space above the camera preview, and shorten the scan instructions in Japanese and English.
+
 - Reorganize Japanese and English Help around five clear steps (including both QR scans), keep essential restrictions visible, and move advanced controls and rendering details into optional sections. Remove unnecessary Help dismissal instructions.
 
 - Align the desktop footer with the header content edge, retaining the existing mobile footer hiding.
