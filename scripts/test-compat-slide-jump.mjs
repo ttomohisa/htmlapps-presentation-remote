@@ -63,9 +63,11 @@ test('every warning group offers direct slide-number buttons and accessible labe
 test('warning jump labels follow the current language and exclude invalid slides',()=>{
  const {host}=harness('en',[{type:'x',label:'Issue',slide:1},{type:'x',label:'Issue',slide:-2},{type:'x',label:'Issue',slide:99},{type:'x',label:'Issue',slide:1}]);
  const links=allChildren(host,e=>e.className==='compat-slide-jump');
- assert.equal(links.length,1);
- assert.equal(links[0].dataset.compatSlideIndex,'1');
- assert.equal(links[0].attributes['aria-label'],'Go to slide 2');
+ assert.equal(links.length,2,'valid PPTX warning and separate render error are both linked');
+ const issue=links.find(el=>el.dataset.compatSlideIndex==='1');
+ assert.ok(issue,'the valid PPTX warning points to the second slide');
+ assert.equal(issue.attributes['aria-label'],'Go to slide 2');
+ assert.equal(links.find(el=>el.dataset.compatSlideIndex==='3')?.attributes['aria-label'],'Go to slide 4');
 });
 
 test('PDF compatibility summary contains no warning jump controls',()=>{
