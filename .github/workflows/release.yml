@@ -1,0 +1,106 @@
+name: Publish Presentation Remote release
+
+# Publish only from main, after the maintainer merges a versioned PR.
+'on':
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: presentation-remote-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout the exact main commit
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Node for regression tests
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 24
+
+      - name: Check version and avoid duplicate releases
+        id: guard
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/verify-release-state.ps1
+
+      - name: Run source regression tests
+        if: steps.guard.outputs.publish == 'true'
+        shell: pwsh
+        run: |
+          node scripts/test-all.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'Source regression tests failed.' }
+
+      - name: Build and verify both standalone HTML variants
+        if: steps.guard.outputs.publish == 'true'
+        shell: pwsh
+        run: |
+          ./scripts/check-repository.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'Standalone verification failed.' }
+          $version = [string]((Get-Content -Raw -Encoding UTF8 'app.config.json' | ConvertFrom-Json).version)
+          $readable = Get-Content -LiteralPath 'dist/index.html' -Raw -Encoding UTF8
+          if (-not $readable.Contains("id=`"versionBadge`">v$version</span>")) {
+            throw "The built HTML does not display v$version."
+          }
+          foreach ($path in @('dist/index.html', 'dist/index.self-extract.html', 'dist/dependency-manifest.json', 'dist/self-extract-manifest.json')) {
+            if (-not (Test-Path -LiteralPath $path)) { throw "Missing release input: $path" }
+          }
+
+      - name: Package release files and SHA-256 checksums
+        if: steps.guard.outputs.publish == 'true'
+        shell: pwsh
+        run: ./scripts/package-release.ps1
+
+      - name: Publish tag and GitHub Release
+        if: steps.guard.outputs.publish == 'true'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tag = "${{ steps.guard.outputs.tag }}"
+          $version = "${{ steps.guard.outputs.version }}"
+          $files = @(
+            "release-out/htmlapps-presentation-remote-v$version.html",
+            "release-out/htmlapps-presentation-remote-v$version.self-extract.html",
+            "release-out/htmlapps-presentation-remote-v$version.zip",
+            'release-out/SHA256SUMS.txt'
+          )
+          gh release create "$tag" $files --repo "$env:GITHUB_REPOSITORY" --target "$env:GITHUB_SHA" --title "Presentation Remote $tag" --notes-file ".github/releases/$tag.md"
+          if ($LASTEXITCODE -ne 0) { throw 'GitHub release publication failed.' }
+
+      - name: Verify published tag target and release assets
+        if: steps.guard.outputs.publish == 'true'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tag = "${{ steps.guard.outputs.tag }}"
+          $version = "${{ steps.guard.outputs.version }}"
+          $tagObject = gh api "repos/$env:GITHUB_REPOSITORY/git/ref/tags/$tag" | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to read the new tag.' }
+          if ([string]$tagObject.object.sha -ne [string]$env:GITHUB_SHA) {
+            throw 'Published tag does not point at the tested release commit.'
+          }
+          $published = gh release view "$tag" --repo "$env:GITHUB_REPOSITORY" --json assets | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to read the new release.' }
+          foreach ($expected in @("htmlapps-presentation-remote-v$version.html", "htmlapps-presentation-remote-v$version.self-extract.html", "htmlapps-presentation-remote-v$version.zip", 'SHA256SUMS.txt')) {
+            if ($published.assets.name -notcontains $expected) {
+              throw "Release asset is missing: $expected"
+            }
+          }
+          Write-Host "Published $tag and verified all four release assets."
