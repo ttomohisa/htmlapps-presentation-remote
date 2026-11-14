@@ -1,20 +1,21 @@
-# Build the v1.1.2 release bundle from verified dist files.
-# Used by both PR validation and the post-merge release workflow.
+# Package the currently declared app version into standalone assets and a checksum-verified ZIP.
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 Push-Location $root
 try {
-  $ErrorActionPreference = 'Stop'
+  $version = [string]((Get-Content -Raw -Encoding UTF8 'app.config.json' | ConvertFrom-Json).version)
+  if ($version -notmatch '^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?$') { throw "Invalid release version: $version" }
   $out = 'release-out'
   $stage = Join-Path $out 'package'
+  if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
   New-Item -ItemType Directory -Force -Path $out, $stage, (Join-Path $stage 'assets') | Out-Null
-  
-  $readable = Join-Path $out 'htmlapps-presentation-remote-v1.1.2.html'
-  $extract = Join-Path $out 'htmlapps-presentation-remote-v1.1.2.self-extract.html'
-  $archive = Join-Path $out 'htmlapps-presentation-remote-v1.1.2.zip'
-  Copy-Item 'dist/index.html' $readable
-  Copy-Item 'dist/index.self-extract.html' $extract
-  
+
+  $readable = Join-Path $out "htmlapps-presentation-remote-v$version.html"
+  $extract = Join-Path $out "htmlapps-presentation-remote-v$version.self-extract.html"
+  $archive = Join-Path $out "htmlapps-presentation-remote-v$version.zip"
+  Copy-Item -LiteralPath 'dist/index.html' -Destination $readable
+  Copy-Item -LiteralPath 'dist/index.self-extract.html' -Destination $extract
+
   $packageFiles = @{
     'index.html' = 'dist/index.html'
     'index.self-extract.html' = 'dist/index.self-extract.html'
@@ -35,8 +36,9 @@ try {
     Copy-Item -LiteralPath 'dist/build-size-report.json' -Destination (Join-Path $stage 'build-size-report.json')
   }
   Copy-Item -Path 'assets/screenshot*.png' -Destination (Join-Path $stage 'assets')
+  if (Test-Path -LiteralPath $archive) { Remove-Item -LiteralPath $archive -Force }
   Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $archive -CompressionLevel Optimal
-  
+
   $assets = @($readable, $extract, $archive)
   $checksums = foreach ($asset in $assets) {
     $hash = (Get-FileHash -LiteralPath $asset -Algorithm SHA256).Hash.ToLowerInvariant()

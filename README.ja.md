@@ -6,7 +6,7 @@
 
 [English README](README.md)
 
-現在のリリース：**v1.1.2**。変更内容は[CHANGELOG.md](CHANGELOG.md)をご覧ください。
+現在のリリース：**v1.1.3**。変更内容は[CHANGELOG.md](CHANGELOG.md)をご覧ください。
 
 手元のPPTX / PDFをPCのブラウザーで開き、スマホをWebRTCリモコンとして使えるプレゼンツールです。資料ファイル本体をアップロードせずに利用できます。
 

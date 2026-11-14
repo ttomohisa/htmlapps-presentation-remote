@@ -2,7 +2,7 @@
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {pathToFileURL}=require('node:url'),{chromium}=require('playwright');
-const cfg={"slug": "presentation-remote", "bp": 720, "end": "[data-i18n=\"helpFullscreenLimit\"]", "badge": "privacyBadge", "header": ".dialog-head", "close": "#closeHelpButton"};
+const cfg={"slug": "presentation-remote", "bp": 720, "end": "[data-i18n=\"helpFullscreenLimit\"]", "header": ".dialog-head", "close": "#closeHelpButton"};
 const evidence=path.resolve('test-results/mobile-footer');
 
 async function assertHeaderVersionFits(page, width, height, label) {
@@ -37,18 +37,33 @@ async function main(){
  await page.locator('#helpButton').waitFor();
  if(await page.locator('html').getAttribute('lang')!==language)await page.locator('#languageButton').click();
 await assertHeaderVersionFits(page, width, height, label);
- const badge=page.locator('[data-i18n="'+cfg.badge+'"]');
- assert.equal((await badge.textContent()).trim(),cfg.slug==='presentation-remote'?(language==='ja'?'資料のアップロードなし':'The deck is not uploaded'):(language==='ja'?'完全ローカル処理':'Fully local processing'));
- assert.equal(await page.locator('.privacy-badge').count(),1,label+': retain one badge');
- assert.match(await page.locator('.privacy-badge svg path').first().getAttribute('d'),/^M12 3 /,label+': retain shield');
- assert.ok(await page.locator('.privacy-badge').isVisible(),label+': badge visible');
+ assert.equal(await page.locator('.privacy-badge').count(),0,label+': redundant privacy badge removed');
+ assert.ok(await page.locator('#introSection').isVisible(),label+': introduction visible before loading a deck');
+ assert.equal((await page.locator('#introSection h1').textContent()).trim(),language==='ja'?'スライドをスマホで操作':'Control slides from your phone',label+': short introduction title');
+ assert.ok((await page.locator('#introSection p').textContent()).length<140,label+': concise feature explanation');
  const phone=width<=cfg.bp||(cfg.slug==='presentation-remote'&&width>height&&height<=560&&width<=1000);
  assert.equal(await page.locator('body > footer').isVisible(),!phone,label+': footer');
+ if(!phone){
+   const edges=await page.evaluate(()=>{
+     const header=document.querySelector('.header-inner'),footer=document.querySelector('body > footer');
+     const hr=header.getBoundingClientRect(),fr=footer.getBoundingClientRect();
+     return {headerLeft:hr.left+parseFloat(getComputedStyle(header).paddingLeft),
+       footerLeft:fr.left+parseFloat(getComputedStyle(footer).paddingLeft)};
+   });
+   assert.ok(Math.abs(edges.headerLeft-edges.footerLeft)<=1,label+': footer text aligns with header content edge '+JSON.stringify(edges));
+ }
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),label+': page width');
  if(cfg.slug==='markdown-preview-lab')assert.equal(await page.locator('.mobile-view-switch').isVisible(),width<=720,label+': workflow switch');
  if(cfg.slug==='smart-image-sorter')assert.equal(await page.locator('.mobile-bottom-bar').isVisible(),width<=600,label+': existing navigation breakpoint');
  if([1360,320].includes(width))await page.screenshot({path:path.join(evidence,label+'.png')});
  await page.locator('#helpButton').click();
+ const help=page.locator('#helpDialog');
+ assert.equal(await help.locator('.help-steps li').count(),5,label+': complete five-step setup');
+ assert.equal(await help.locator('.help-more:not([open])').count(),2,label+': technical details folded by default');
+ assert.equal(await help.locator('[data-i18n="helpDialogScroll"]').count(),0,label+': no closing instructions');
+ assert.ok(await help.locator('.help-steps li').nth(3).textContent().then(t=>t.includes(language==='ja'?'返答QR':'reply QR')),label+': second QR step is explicit');
+ assert.ok(await help.evaluate(el=>{const body=el.querySelector('.dialog-body');return body.scrollWidth<=body.clientWidth+1}),label+': no Help horizontal overflow');
+ if([1360,320].includes(width))await page.screenshot({path:path.join(evidence,label+'-help.png')});
  await page.locator('#helpDialog .dialog-body').evaluate(el=>{el.scrollTop=el.scrollHeight;});
  const bounds=await page.locator(cfg.end).evaluate(el=>{const range=document.createRange(),t=el.firstChild;range.setStart(t,t.textContent.length-1);range.setEnd(t,t.textContent.length);const r=range.getBoundingClientRect();let top=0,bottom=innerHeight;for(let p=el.parentElement;p;p=p.parentElement){const s=getComputedStyle(p);if(/auto|scroll|hidden|clip/.test(s.overflowY)){const b=p.getBoundingClientRect();top=Math.max(top,b.top);bottom=Math.min(bottom,b.bottom);}}return{top:r.top,bottom:r.bottom,clipTop:top,clipBottom:bottom};});
  assert.ok(bounds.top>=bounds.clipTop-1&&bounds.bottom<=bounds.clipBottom+1,label+': Help end reachable '+JSON.stringify(bounds));

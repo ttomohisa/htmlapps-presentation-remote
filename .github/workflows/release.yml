@@ -1,20 +1,17 @@
-name: Publish Presentation Remote v1.1.2
+name: Publish Presentation Remote release
 
-# Publish only after the release-preparation PR is merged by the maintainer.
+# Publish only from main, after the maintainer merges a versioned PR.
 'on':
   push:
     branches:
       - main
-    paths:
-      - app.config.json
-      - .github/workflows/release-v112.yml
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: presentation-remote-release-v112
+  group: presentation-remote-release
   cancel-in-progress: false
 
 jobs:
@@ -33,13 +30,16 @@ jobs:
         with:
           node-version: 24
 
+      - name: Test release guard success and failure modes offline
+        shell: pwsh
+        run: ./scripts/test-release-guard.ps1
+
       - name: Check version and avoid duplicate releases
         id: guard
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          ./scripts/verify-release-state-v112.ps1
+        run: ./scripts/verify-release-state.ps1
 
       - name: Run source regression tests
         if: steps.guard.outputs.publish == 'true'
@@ -54,9 +54,10 @@ jobs:
         run: |
           ./scripts/check-repository.ps1
           if ($LASTEXITCODE -ne 0) { throw 'Standalone verification failed.' }
+          $version = [string]((Get-Content -Raw -Encoding UTF8 'app.config.json' | ConvertFrom-Json).version)
           $readable = Get-Content -LiteralPath 'dist/index.html' -Raw -Encoding UTF8
-          if (-not $readable.Contains('id="versionBadge">v1.1.2</span>')) {
-            throw 'The built HTML does not display v1.1.2.'
+          if (-not $readable.Contains("id=`"versionBadge`">v$version</span>")) {
+            throw "The built HTML does not display v$version."
           }
           foreach ($path in @('dist/index.html', 'dist/index.self-extract.html', 'dist/dependency-manifest.json', 'dist/self-extract-manifest.json')) {
             if (-not (Test-Path -LiteralPath $path)) { throw "Missing release input: $path" }
@@ -65,24 +66,24 @@ jobs:
       - name: Package release files and SHA-256 checksums
         if: steps.guard.outputs.publish == 'true'
         shell: pwsh
-        run: |
-          ./scripts/package-release-v112.ps1
+        run: ./scripts/package-release.ps1
 
-      - name: Publish v1.1.2 tag and GitHub Release
+      - name: Publish tag and GitHub Release
         if: steps.guard.outputs.publish == 'true'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           $ErrorActionPreference = 'Stop'
+          $tag = "${{ steps.guard.outputs.tag }}"
+          $version = "${{ steps.guard.outputs.version }}"
           $files = @(
-            'release-out/htmlapps-presentation-remote-v1.1.2.html',
-            'release-out/htmlapps-presentation-remote-v1.1.2.self-extract.html',
-            'release-out/htmlapps-presentation-remote-v1.1.2.zip',
+            "release-out/htmlapps-presentation-remote-v$version.html",
+            "release-out/htmlapps-presentation-remote-v$version.self-extract.html",
+            "release-out/htmlapps-presentation-remote-v$version.zip",
             'release-out/SHA256SUMS.txt'
           )
-          # gh release create creates the tag on this exact tested commit if absent.
-          gh release create v1.1.2 $files --repo "$env:GITHUB_REPOSITORY" --target "$env:GITHUB_SHA" --title 'Presentation Remote v1.1.2' --notes-file '.github/releases/v1.1.2.md'
+          gh release create "$tag" $files --repo "$env:GITHUB_REPOSITORY" --target "$env:GITHUB_SHA" --title "Presentation Remote $tag" --notes-file ".github/releases/$tag.md"
           if ($LASTEXITCODE -ne 0) { throw 'GitHub release publication failed.' }
 
       - name: Verify published tag target and release assets
@@ -92,16 +93,18 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $ErrorActionPreference = 'Stop'
-          $tagObject = gh api "repos/$env:GITHUB_REPOSITORY/git/ref/tags/v1.1.2" | ConvertFrom-Json
+          $tag = "${{ steps.guard.outputs.tag }}"
+          $version = "${{ steps.guard.outputs.version }}"
+          $tagObject = gh api "repos/$env:GITHUB_REPOSITORY/git/ref/tags/$tag" | ConvertFrom-Json
           if ($LASTEXITCODE -ne 0) { throw 'Unable to read the new tag.' }
           if ([string]$tagObject.object.sha -ne [string]$env:GITHUB_SHA) {
             throw 'Published tag does not point at the tested release commit.'
           }
-          $published = gh release view v1.1.2 --repo "$env:GITHUB_REPOSITORY" --json assets | ConvertFrom-Json
+          $published = gh release view "$tag" --repo "$env:GITHUB_REPOSITORY" --json assets | ConvertFrom-Json
           if ($LASTEXITCODE -ne 0) { throw 'Unable to read the new release.' }
-          foreach ($expected in @('htmlapps-presentation-remote-v1.1.2.html', 'htmlapps-presentation-remote-v1.1.2.self-extract.html', 'htmlapps-presentation-remote-v1.1.2.zip', 'SHA256SUMS.txt')) {
+          foreach ($expected in @("htmlapps-presentation-remote-v$version.html", "htmlapps-presentation-remote-v$version.self-extract.html", "htmlapps-presentation-remote-v$version.zip", 'SHA256SUMS.txt')) {
             if ($published.assets.name -notcontains $expected) {
               throw "Release asset is missing: $expected"
             }
           }
-          Write-Host 'Published v1.1.2 tag and verified all four release assets.'
+          Write-Host "Published $tag and verified all four release assets."

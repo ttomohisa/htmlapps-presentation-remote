@@ -17,7 +17,59 @@ async function pageIn(viewport){const c=await browser.newContext({viewport,local
 (async()=>{
  browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||undefined,args:['--use-fake-device-for-media-stream','--use-fake-ui-for-media-stream']});
  const host=await pageIn({width:1360,height:900}),phone=await pageIn({width:393,height:852});
- await host.locator('#fileInput').setInputFiles(pdf);await host.locator('#presenterView').waitFor({state:'visible'});await host.locator('#slideSurface canvas').waitFor();await waitText(host,'#timerStatus','Not started');assert.equal(await host.locator('#timerText').textContent(),'00:00');
+ assert.equal(await host.locator('#introSection').isVisible(),true,'intro visible before opening PDF');
+ assert.equal(await host.locator('.privacy-badge').count(),0,'no redundant privacy badge');
+ await host.locator('#fileInput').setInputFiles(pdf);await host.locator('#presenterView').waitFor({state:'visible'});await host.locator('#slideSurface canvas').waitFor();
+ assert.equal(await host.locator('#introSection').isVisible(),false,'intro hidden after opening PDF');
+ assert.equal(await host.locator('#compatDetails').getAttribute('open'),null,'compatibility check collapsed by default');
+ assert.equal(await host.locator('#compatWarning').isVisible(),false,'normal PDF has no warning');
+ const desktopLayout=await host.evaluate(()=>{
+  const compat=document.querySelector('.compat-inline'),nav=document.querySelector('.nav-bar'),right=document.querySelector('.side-column');
+  const rect=compat.getBoundingClientRect(),navRect=nav.getBoundingClientRect(),css=getComputedStyle(compat);
+  return {insideCenter:!!compat.closest('.center-column'),inSidebar:!!compat.closest('.side-column'),afterNav:rect.top>=navRect.bottom-1,borderWidth:css.borderTopWidth,cardCount:right.querySelectorAll(':scope > .card').length,compatCards:right.querySelectorAll('.compat-card').length};
+ });
+ assert.ok(desktopLayout.insideCenter&&!desktopLayout.inSidebar&&desktopLayout.afterNav&&desktopLayout.borderWidth==='0px'&&desktopLayout.cardCount===2&&desktopLayout.compatCards===0,'compatibility check lives unboxed beneath slide controls on desktop: '+JSON.stringify(desktopLayout));
+ await host.locator('#compatDetails > summary').click();assert.equal(await host.locator('#compatSummary').isVisible(),true,'compatibility details accessible when expanded');
+ await host.evaluate(()=>{const link=document.createElement('button');link.type='button';link.className='compat-slide-jump';link.textContent='3';link.dataset.compatSlideIndex='2';document.querySelector('#compatSummary').append(link)});
+ await host.locator('#compatSummary [data-compat-slide-index="2"]').click();
+ await host.waitForFunction(()=>document.querySelector('#slideNumber').value==='3');
+ await host.locator('#slideNumber').fill('1');await host.locator('#slideNumber').dispatchEvent('change');
+ await host.waitForFunction(()=>document.querySelector('#slideNumber').value==='1');
+ await host.locator('#compatDetails > summary').click();
+ await pass('unboxed compatibility placement and slide-link navigation in desktop presenter');
+ // Between mobile and wide-desktop breakpoints, both control cards must fill the entire row.
+ for(const width of [721,800,900,1040]){
+  await host.setViewportSize({width,height:900});
+  const layout=await host.evaluate(()=>{
+   const side=document.querySelector('.side-column'),cards=[...side.querySelectorAll(':scope > .side-card')];
+   const box=side.getBoundingClientRect(),first=cards[0].getBoundingClientRect(),last=cards[1].getBoundingClientRect();
+   return {sideLeft:box.left,sideRight:box.right,firstLeft:first.left,firstRight:first.right,secondLeft:last.left,secondRight:last.right,firstTop:first.top,secondTop:last.top,columnCount:getComputedStyle(side).gridTemplateColumns.split(' ').length,scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth};
+  });
+  assert.equal(layout.columnCount,2,'exactly two mid-width control columns: '+JSON.stringify(layout));
+  assert.ok(Math.abs(layout.firstLeft-layout.sideLeft)<2&&Math.abs(layout.secondRight-layout.sideRight)<2,'controls occupy both ends of the row: '+JSON.stringify(layout));
+  assert.ok(layout.secondLeft>layout.firstRight&&Math.abs(layout.firstTop-layout.secondTop)<2,'cards are side-by-side: '+JSON.stringify(layout));
+  assert.ok(layout.scrollWidth<=layout.viewport,'no horizontal overflow: '+JSON.stringify(layout));
+  if(width===800)await host.screenshot({path:path.join(out,'presenter-800-controls-filled.png')});
+ }
+ await host.setViewportSize({width:1360,height:900});
+ await pass('721–1040px presenter uses two full-width control columns with no empty third slot');
+ await pass('loaded deck hides intro and starts with compatibility details collapsed');
+ const narrowDeck=await pageIn({width:320,height:640});
+ await narrowDeck.locator('#fileInput').setInputFiles(pdf);
+ await narrowDeck.locator('#presenterView').waitFor({state:'visible'});
+ await narrowDeck.locator('#slideSurface canvas').waitFor();
+ const narrowLayout=await narrowDeck.evaluate(()=>{
+  const compat=document.querySelector('.compat-inline'),nav=document.querySelector('.nav-bar'),css=getComputedStyle(compat);
+  return {inCenter:!!compat.closest('.center-column'),borderWidth:css.borderTopWidth,afterNav:compat.getBoundingClientRect().top>=nav.getBoundingClientRect().bottom-1,scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth};
+ });
+ assert.ok(narrowLayout.inCenter&&narrowLayout.borderWidth==='0px'&&narrowLayout.afterNav&&narrowLayout.scrollWidth<=narrowLayout.viewport,'mobile 320px compatibility layout: '+JSON.stringify(narrowLayout));
+ await narrowDeck.locator('#compatDetails > summary').click();
+ assert.equal(await narrowDeck.locator('#compatSummary').isVisible(),true);
+ assert.equal(await narrowDeck.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'expanded compatibility does not overflow phone width');
+ await narrowDeck.screenshot({path:path.join(out,'mobile-compat-unboxed.png')});
+ await narrowDeck.close();
+ await pass('mobile compatibility is unboxed without horizontal scrolling');
+ await waitText(host,'#timerStatus','Not started');assert.equal(await host.locator('#timerText').textContent(),'00:00');
  await host.locator('#connectPhoneButton').click();await host.waitForFunction(()=>document.querySelector('[data-host-offer-code]').value.length>100);
  const offer=await host.locator('[data-host-offer-code]').inputValue();await phone.locator('#joinButton').click();await phone.locator('[data-copy="manualOfferReceive"]').click();await phone.locator('[data-join-offer-input]').fill(offer);await phone.locator('[data-action="join-use-offer"]').click();await phone.locator('[data-action="join-create-answer"]').click();await phone.waitForFunction(()=>document.querySelector('[data-join-answer-code]').value.length>100);
  const answer=await phone.locator('[data-join-answer-code]').inputValue();await host.locator('[data-copy="manualAnswer"]').first().click();await host.locator('[data-host-answer-input]').fill(answer);await host.locator('[data-action="host-apply-answer"]').click();await phone.locator('#remoteNext').waitFor();await waitText(phone,'#remoteConnectionText','Connected');await host.locator('#pairDialog').waitFor({state:'hidden'});await phone.locator('#pairDialog').waitFor({state:'hidden'});await pass('real WebRTC manual offer/answer pairing; file load remains idle');
@@ -25,9 +77,24 @@ async function pageIn(viewport){const c=await browser.newContext({viewport,local
  await phone.locator('#remoteMore').click();await phone.locator('#remoteTimerDuration').selectOption('custom');await phone.locator('#remoteTimerMinutes').fill('1');await phone.locator('#remoteTimerApply').click();await waitText(host,'#timerRemaining','01:00');await phone.locator('#remoteTimerStart').click();await waitText(host,'#timerStatus','Running');await waitText(phone,'#remoteTimerStatus','Running');await waitText(host,'#timerText','00:02');await phone.locator('#remoteTimerPause').click();await waitText(host,'#timerStatus','Paused');await waitText(phone,'#remoteTimerStatus','Paused');const paused=await phone.locator('#remoteTimer').textContent();await phone.locator('#remoteTimerDuration').selectOption('custom');await phone.locator('#remoteTimerMinutes').fill('17');await host.locator('#languageButton').click();await host.locator('#languageButton').click();await host.screenshot({path:path.join(out,'desktop-timer.png')});assert.equal(await phone.locator('#remoteTimerMinutes').inputValue(),'17');assert.equal(await phone.locator('#remoteTimer').textContent(),paused);await phone.locator('#remoteTimerStart').click();await waitText(host,'#timerStatus','Running');await pass('start/pause/resume synchronized; duration draft survives host state');
  for(const [width,height]of [[320,568],[393,852],[852,393]]){await phone.setViewportSize({width,height});for(const lang of ['en','ja']){if(await phone.locator('html').getAttribute('lang')!==lang)await phone.locator('#languageButton').click();await phone.locator('#remoteTimerApply').scrollIntoViewIfNeeded();assert.equal(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await phone.screenshot({path:path.join(out,`phone-${width}-${lang}.png`)});assert.equal(await phone.locator('#remoteTimerMinutes').inputValue(),'17')}}await pass('JA/EN timer and command UI at 320 portrait, 393 portrait and 852 landscape');
  const scan=await pageIn({width:393,height:852});await scan.locator('#joinButton').click();await scan.locator('[data-scanner-panel="join"] video').waitFor({state:'visible'});await scan.waitForFunction(()=>document.querySelector('[data-scan-video="join"]').videoWidth>0);
- const geometry=[];for(const [width,height]of [[393,852],[852,393],[320,568]]){await scan.setViewportSize({width,height});await scan.locator('[data-scanner-panel="join"] video').scrollIntoViewIfNeeded();await scan.waitForFunction(()=>{const g=document.querySelector('[data-scanner-panel="join"] .app-webrtc-scan-guide').getBoundingClientRect(),f=document.querySelector('[data-scanner-panel="join"] .app-webrtc-scan').getBoundingClientRect();return Math.abs(g.width-g.height)<.1&&g.width>0&&Math.abs(g.width-Math.floor(Math.min(f.width,f.height)*.76))<2});const m=await scan.locator('[data-scanner-panel="join"] .app-webrtc-scan-guide').evaluate(el=>{const r=el.getBoundingClientRect(),f=el.parentElement.getBoundingClientRect();return{width:r.width,height:r.height,centerX:(r.left+r.right)/2-(f.left+f.right)/2,centerY:(r.top+r.bottom)/2-(f.top+f.bottom)/2}});assert.ok(Math.abs(m.centerX)<2&&Math.abs(m.centerY)<2);geometry.push({viewport:[width,height],...m});await scan.screenshot({path:path.join(out,`qr-${width}.png`)})}await scan.locator('[data-action="join-stop-camera"]').click();await scan.locator('[data-scanner-panel="join"]').waitFor({state:'hidden'});await pass('actual fake-camera QR guide square, centered, contained and follows rotation');
+ const geometry=[];for(const [width,height]of [[393,852],[852,393],[320,568]]){await scan.setViewportSize({width,height});await scan.locator('[data-scanner-panel="join"] video').scrollIntoViewIfNeeded();
+ const pairingLayout=await scan.evaluate(()=>{
+   const button=document.querySelector('[data-action="join-scan-offer"]'),camera=document.querySelector('[data-scanner-panel="join"] .app-webrtc-scan'),role=document.querySelector('[data-webrtc-view="join"] [data-action="chooser"]'),coach=document.querySelector('[data-coach-body="join"]');
+   const btn=button.getBoundingClientRect(),cam=camera.getBoundingClientRect(),roleRect=role.getBoundingClientRect(),lineHeight=parseFloat(getComputedStyle(coach).lineHeight);
+   return {cameraGap:cam.top-btn.bottom,roleWrap:getComputedStyle(role).whiteSpace,roleFits:role.scrollWidth<=role.clientWidth+1,roleInDialog:roleRect.right<=document.querySelector('#pairDialog').getBoundingClientRect().right+1,coachHeight:coach.getBoundingClientRect().height,lineHeight,coachText:coach.textContent};
+ });
+ assert.ok(pairingLayout.cameraGap>=10,'camera has space after scan button: '+JSON.stringify(pairingLayout));
+ assert.ok(pairingLayout.roleWrap==='nowrap'&&pairingLayout.roleFits&&pairingLayout.roleInDialog,'role switch fits on one line: '+JSON.stringify(pairingLayout));
+ if(width===320){
+   assert.ok(pairingLayout.coachHeight<=pairingLayout.lineHeight+1,'English scan guidance fits one line: '+JSON.stringify(pairingLayout));
+   await scan.evaluate(()=>document.querySelector('#languageButton').click());
+   const ja=await scan.locator('[data-coach-body="join"]').evaluate(el=>({height:el.getBoundingClientRect().height,lineHeight:parseFloat(getComputedStyle(el).lineHeight),text:el.textContent}));
+   assert.ok(ja.text.includes('自動で読み取ります')&&ja.height<=ja.lineHeight+1,'Japanese scan guidance fits one line: '+JSON.stringify(ja));
+   await scan.screenshot({path:path.join(out,'qr-320-ja.png')});
+   await scan.evaluate(()=>document.querySelector('#languageButton').click());
+ }await scan.waitForFunction(()=>{const g=document.querySelector('[data-scanner-panel="join"] .app-webrtc-scan-guide').getBoundingClientRect(),f=document.querySelector('[data-scanner-panel="join"] .app-webrtc-scan').getBoundingClientRect();return Math.abs(g.width-g.height)<.1&&g.width>0&&Math.abs(g.width-Math.floor(Math.min(f.width,f.height)*.76))<2});const m=await scan.locator('[data-scanner-panel="join"] .app-webrtc-scan-guide').evaluate(el=>{const r=el.getBoundingClientRect(),f=el.parentElement.getBoundingClientRect();return{width:r.width,height:r.height,centerX:(r.left+r.right)/2-(f.left+f.right)/2,centerY:(r.top+r.bottom)/2-(f.top+f.bottom)/2}});assert.ok(Math.abs(m.centerX)<2&&Math.abs(m.centerY)<2);geometry.push({viewport:[width,height],...m});await scan.screenshot({path:path.join(out,`qr-${width}.png`)})}await scan.locator('[data-action="join-stop-camera"]').click();await scan.locator('[data-scanner-panel="join"]').waitFor({state:'hidden'});await pass('actual fake-camera QR guide square, centered, contained and follows rotation');
  await host.waitForFunction(()=>document.querySelector('#timerRemainingLabel').textContent==='Overtime',null,{timeout:75000});assert.equal(await host.locator('#timerStatus').textContent(),'Running');await phone.locator('#remoteMore').click();await phone.locator('#remoteNext').click();await waitText(phone,'#remoteCommandStatus',await phone.locator('html').getAttribute('lang')==='ja'?'反映済み':'Applied');assert.equal(await host.locator('#slideNumber').inputValue(),'3');await pass('real 1-minute expiry shows overtime without stopping slide navigation');
  await phone.locator('#remoteMore').click();await phone.locator('#remoteResetTimer').click();await waitText(host,'#timerStatus','Not started');await waitText(host,'#timerText','00:00');await host.locator('#fileInput').setInputFiles(pdf);await waitText(host,'#timerRemaining','01:00');await pass('phone reset and replacement deck reset elapsed while retaining applied duration');
- const compressed=await pageIn({width:1000,height:800});await compressed.goto(pathToFileURL(path.resolve('dist/index.self-extract.html')).href);await compressed.locator('#helpButton').waitFor();assert.ok((await compressed.locator('body').innerText()).includes('v1.1.2'));await pass('self-extract artifact boots v1.1.2');
+ const compressed=await pageIn({width:1000,height:800});await compressed.goto(pathToFileURL(path.resolve('dist/index.self-extract.html')).href);await compressed.locator('#helpButton').waitFor();assert.ok((await compressed.locator('body').innerText()).includes('v'+JSON.parse(fs.readFileSync('app.config.json','utf8')).version));await pass('self-extract artifact boots v1.1.2');
  assert.deepEqual(errors,[]);assert.deepEqual(requests,[]);fs.writeFileSync(path.join(out,'result.json'),JSON.stringify({passed:true,checks,geometry,errors,requests,warnings},null,2));await browser.close();
 })().catch(async e=>{console.error(e);for(const [i,p]of (browser?.contexts().flatMap(c=>c.pages())||[]).entries())await p.screenshot({path:path.join(out,`failure-${i}.png`)}).catch(()=>{});fs.writeFileSync(path.join(out,'result.json'),JSON.stringify({passed:false,checks,errors,requests,warnings,error:String(e)},null,2));await browser?.close();process.exitCode=1});

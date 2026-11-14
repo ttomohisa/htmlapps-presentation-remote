@@ -15,7 +15,7 @@ on:
       - "scripts/build-self-extract.ps1"
       - "scripts/verify-self-extract.ps1"
       - ".github/workflows/build-standalone.yml"
-      - ".github/workflows/release-v112.yml"
+      - ".github/workflows/release.yml"
 
 permissions:
   contents: read
@@ -33,11 +33,15 @@ jobs:
         with:
           node-version: 24
 
+      - name: Test release guard success and failure modes offline
+        shell: pwsh
+        run: ./scripts/test-release-guard.ps1
+
       - name: Check release guard safely against GitHub (read-only)
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: ./scripts/verify-release-state-v112.ps1 -DryRun
+        run: ./scripts/verify-release-state.ps1 -DryRun
 
       - name: Run behavioral regressions
         run: node scripts/test-all.mjs
@@ -46,19 +50,18 @@ jobs:
         shell: pwsh
         run: ./scripts/check-repository.ps1
 
-      - name: Verify v1.1.2 release package in PR CI
+      - name: Verify versioned release package in PR CI
         shell: pwsh
         run: |
-          ./scripts/package-release-v112.ps1
+          ./scripts/package-release.ps1
 
       - name: Upload release candidate files
         uses: actions/upload-artifact@v7
         with:
-          name: v112-release-candidate-${{ github.event.pull_request.head.sha || github.sha }}
+          name: release-candidate-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
-            release-out/htmlapps-presentation-remote-v1.1.2.html
-            release-out/htmlapps-presentation-remote-v1.1.2.self-extract.html
-            release-out/htmlapps-presentation-remote-v1.1.2.zip
+            release-out/htmlapps-presentation-remote-v*.html
+            release-out/htmlapps-presentation-remote-v*.zip
             release-out/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 14
