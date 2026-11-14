@@ -580,7 +580,7 @@
       host:{ pc:null, channel:null, attempt:0, everConnected:false, offerCode:'', answerApplied:false, failureHandling:false, diagnosticTimer:0, diagnosticBusy:false, lastPairStats:null },
       join:{ pc:null, channel:null, pendingOffer:null, attempt:0, everConnected:false, answerCode:'', answerState:'idle', autoRetryCount:0, autoRetryTimer:0, failureHandling:false, diagnosticTimer:0, diagnosticBusy:false, lastPairStats:null },
       qr:{ hostPages:[], hostIndex:0, hostTimer:0, joinPages:[], joinIndex:0, joinTimer:0 },
-      scanner:{ mode:'', stream:null, frame:0, decoder:null, canvasCtx:null, lastDecode:0, session:'', total:0, parts:new Map() },
+      scanner:{ mode:'', stream:null, frame:0, decoder:null, canvasCtx:null, lastDecode:0, session:'', total:0, parts:new Map(), generation:0, cameraRequestId:0 },
       connected:false,
       destroyed:false
     };
@@ -818,14 +818,65 @@
 
     function scannerElements(role){return {panel:q(`[data-scanner-panel="${role}"]`),video:q(`[data-scan-video="${role}"]`),canvas:q(`[data-scan-canvas="${role}"]`),resolution:q(`[data-scan-resolution="${role}"]`),progress:q(`[data-scan-progress="${role}"]`),cameraField:q(`[data-camera-field="${role}"]`),cameraSelect:q(`[data-camera-select="${role}"]`),chunks:q(`[data-scan-chunks="${role}"]`)};}
     async function ensureScannerDecoder(role) { if(state.scanner.decoder)return state.scanner.decoder;if('BarcodeDetector'in window){try{const formats=typeof BarcodeDetector.getSupportedFormats==='function'?await BarcodeDetector.getSupportedFormats():['qr_code'];if(formats.includes('qr_code')){const detector=new BarcodeDetector({formats:['qr_code']});state.scanner.decoder=async video=>(await detector.detect(video))[0]?.rawValue||'';return state.scanner.decoder;}}catch{}}if(typeof window.jsQR!=='function'){if(!window.StandaloneAssets?.loadClassicScript)throw new Error('StandaloneAssets unavailable');await window.StandaloneAssets.loadClassicScript(options.decoderDependencyId,options.decoderAssetKey,'jsQR');}if(typeof window.jsQR!=='function')throw new Error('jsQR unavailable');const canvas=scannerElements(role).canvas;state.scanner.canvasCtx=canvas.getContext('2d',{willReadFrequently:true});state.scanner.decoder=async video=>{if(!video.videoWidth||!video.videoHeight)return'';const scale=Math.min(1,1280/video.videoWidth),w=Math.max(320,Math.round(video.videoWidth*scale)),h=Math.max(240,Math.round(video.videoHeight*scale));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}state.scanner.canvasCtx.drawImage(video,0,0,w,h);const image=state.scanner.canvasCtx.getImageData(0,0,w,h);return window.jsQR(image.data,w,h,{inversionAttempts:'attemptBoth'})?.data||'';};return state.scanner.decoder; }
-    async function openCamera(role,deviceId='') { if(state.scanner.stream)state.scanner.stream.getTracks().forEach(track=>track.stop());const els=scannerElements(role),videoConstraints={width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:15,max:30}};if(deviceId)videoConstraints.deviceId={exact:deviceId};else if(role==='join')videoConstraints.facingMode={ideal:'environment'};state.scanner.stream=await navigator.mediaDevices.getUserMedia({video:videoConstraints,audio:false});els.video.srcObject=state.scanner.stream;await els.video.play();const track=state.scanner.stream.getVideoTracks()[0],settings=track.getSettings?.()||{};els.resolution.textContent=format(t('resolution'),{width:settings.width||els.video.videoWidth||'—',height:settings.height||els.video.videoHeight||'—'});try{const caps=track.getCapabilities?.()||{},advanced={};if(caps.focusMode?.includes?.('continuous'))advanced.focusMode='continuous';await track.applyConstraints({width:{ideal:Math.min(1920,caps.width?.max||1920)},height:{ideal:Math.min(1080,caps.height?.max||1080)},advanced:Object.keys(advanced).length?[advanced]:[]});}catch{}const devices=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');els.cameraSelect.innerHTML='';devices.forEach((d,i)=>{const o=document.createElement('option');o.value=d.deviceId;o.textContent=d.label||`Camera ${i+1}`;if(d.deviceId===track.getSettings?.().deviceId)o.selected=true;els.cameraSelect.append(o);});els.cameraField.hidden=devices.length<2; }
+    async function openCamera(role,deviceId='',generation=state.scanner.generation) {
+      const requestId=++state.scanner.cameraRequestId;
+      if(state.scanner.stream)state.scanner.stream.getTracks().forEach(track=>track.stop());
+      state.scanner.stream=null;
+      const els=scannerElements(role),videoConstraints={width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:15,max:30}};
+      if(deviceId)videoConstraints.deviceId={exact:deviceId};else if(role==='join')videoConstraints.facingMode={ideal:'environment'};
+      const stream=await navigator.mediaDevices.getUserMedia({video:videoConstraints,audio:false});
+      const current=()=>!state.destroyed&&state.scanner.generation===generation&&state.scanner.cameraRequestId===requestId&&state.scanner.mode===role;
+      if(!current()){stream.getTracks().forEach(track=>track.stop());return false;}
+      state.scanner.stream=stream;els.video.srcObject=stream;
+      await els.video.play();
+      if(!current())return false;
+      const track=stream.getVideoTracks()[0],settings=track.getSettings?.()||{};
+      els.resolution.textContent=format(t('resolution'),{width:settings.width||els.video.videoWidth||'—',height:settings.height||els.video.videoHeight||'—'});
+      try{const caps=track.getCapabilities?.()||{},advanced={};if(caps.focusMode?.includes?.('continuous'))advanced.focusMode='continuous';await track.applyConstraints({width:{ideal:Math.min(1920,caps.width?.max||1920)},height:{ideal:Math.min(1080,caps.height?.max||1080)},advanced:Object.keys(advanced).length?[advanced]:[]});}catch{}
+      if(!current())return false;
+      const devices=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
+      if(!current())return false;
+      els.cameraSelect.innerHTML='';
+      devices.forEach((d,i)=>{const o=document.createElement('option');o.value=d.deviceId;o.textContent=d.label||`Camera ${i+1}`;if(d.deviceId===track.getSettings?.().deviceId)o.selected=true;els.cameraSelect.append(o)});
+      els.cameraField.hidden=devices.length<2;
+      return true;
+    }
     function renderChunks(role,total,parts){const bar=scannerElements(role).chunks;if(!total){bar.innerHTML='';return;}bar.innerHTML=Array.from({length:total},(_,i)=>`<span class="app-webrtc-scan-chunk${parts.has(i+1)?' is-done':''}"></span>`).join('');}
     function parseTransferQr(role,raw){if(raw.startsWith(`${options.payloadPrefix}.`))return{complete:raw};const prefix=options.qrPrefix.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),match=new RegExp(`^${prefix}\\.([a-z0-9]+)\\.(\\d+)\\.(\\d+)\\.(.+)$`,'i').exec(raw);if(!match)return null;const [,session,indexText,totalText,chunk]=match,index=Number(indexText),total=Number(totalText);if(index<1||total<1||index>total||total>20)return null;if(state.scanner.session!==session){state.scanner.session=session;state.scanner.total=total;state.scanner.parts=new Map();scannerElements(role).progress.textContent=format(t('pagesReady'),{total});renderChunks(role,total,state.scanner.parts);}if(state.scanner.total!==total)return null;state.scanner.parts.set(index,chunk);renderChunks(role,total,state.scanner.parts);scannerElements(role).progress.textContent=format(t('chunks'),{read:state.scanner.parts.size,total});if(state.scanner.parts.size===total){let full='';for(let i=1;i<=total;i++){if(!state.scanner.parts.has(i))return null;full+=state.scanner.parts.get(i);}return{complete:full};}return{partial:true};}
-    async function startScanner(role) { if(!navigator.mediaDevices?.getUserMedia){notify(t('cameraUnsupported'),'warning');return;}stopScanner();state.scanner.mode=role;const els=scannerElements(role);try{state.scanner.session='';state.scanner.total=0;state.scanner.parts=new Map();state.scanner.lastDecode=0;els.progress.textContent=t('scanStart');renderChunks(role,0,new Map());els.panel.hidden=false;watchScanGuide(role);await ensureScannerDecoder(role);await openCamera(role);if(role==='host')els.progress.textContent=t('scanReady');const tick=async now=>{if(!state.scanner.stream)return;if(now-state.scanner.lastDecode>180){state.scanner.lastDecode=now;try{const raw=await state.scanner.decoder(els.video);if(raw){const parsed=parseTransferQr(role,String(raw).trim());if(parsed?.complete){if(role==='join'){q('[data-join-offer-input]').value=parsed.complete;notify(t('scanOfferFound'));stopScanner();await acceptJoinOffer(parsed.complete);return;}q('[data-host-answer-input]').value=parsed.complete;q('[data-action="host-apply-answer"]').disabled=false;notify(t('scanAnswerFound'));stopScanner();await applyHostAnswer(parsed.complete);return;}}}catch{}}state.scanner.frame=requestAnimationFrame(tick);};state.scanner.frame=requestAnimationFrame(tick);}catch(error){console.warn(error);notify(t('cameraFailed'),'warning');stopScanner();}}
+    async function startScanner(role) {
+      if(!navigator.mediaDevices?.getUserMedia){notify(t('cameraUnsupported'),'warning');return;}
+      stopScanner();const generation=state.scanner.generation;
+      state.scanner.mode=role;
+      const current=()=>!state.destroyed&&state.scanner.generation===generation&&state.scanner.mode===role;
+      const els=scannerElements(role);
+      try{
+        state.scanner.session='';state.scanner.total=0;state.scanner.parts=new Map();state.scanner.lastDecode=0;
+        els.progress.textContent=t('scanStart');renderChunks(role,0,new Map());els.panel.hidden=false;watchScanGuide(role);
+        await ensureScannerDecoder(role);if(!current())return;
+        if(!await openCamera(role,'',generation)||!current())return;
+        if(role==='host')els.progress.textContent=t('scanReady');
+        const tick=async now=>{
+          if(!current()||!state.scanner.stream)return;
+          if(now-state.scanner.lastDecode>180){
+            state.scanner.lastDecode=now;
+            try{
+              const decoder=state.scanner.decoder,raw=decoder?await decoder(els.video):'';
+              if(!current())return;
+              if(raw){const parsed=parseTransferQr(role,String(raw).trim());if(parsed?.complete){
+                if(role==='join'){q('[data-join-offer-input]').value=parsed.complete;notify(t('scanOfferFound'));stopScanner();await acceptJoinOffer(parsed.complete);return;}
+                q('[data-host-answer-input]').value=parsed.complete;q('[data-action="host-apply-answer"]').disabled=false;notify(t('scanAnswerFound'));stopScanner();await applyHostAnswer(parsed.complete);return;
+              }}
+            }catch(error){if(!current())return;}
+          }
+          if(current())state.scanner.frame=requestAnimationFrame(tick);
+        };
+        if(current())state.scanner.frame=requestAnimationFrame(tick);
+      }catch(error){if(!current())return;console.warn(error);notify(t('cameraFailed'),'warning');stopScanner();}
+    }
     function updateScanGuide(frame){const rect=frame.getBoundingClientRect();frame.style.setProperty('--scan-guide-size',Math.max(0,Math.floor(Math.min(rect.width,rect.height)*.76))+'px');}
     function stopScanGuide(){state.scanner.guideObserver?.disconnect();state.scanner.guideObserver=null;if(state.scanner.guideResize){window.removeEventListener('resize',state.scanner.guideResize);state.scanner.guideResize=null;}}
     function watchScanGuide(role){stopScanGuide();const frame=scannerElements(role).video.parentElement,update=()=>updateScanGuide(frame);update();if(window.ResizeObserver){state.scanner.guideObserver=new window.ResizeObserver(update);state.scanner.guideObserver.observe(frame);}else{state.scanner.guideResize=update;window.addEventListener('resize',update);}}
-    function stopScanner(){stopScanGuide();if(state.scanner.frame)cancelAnimationFrame(state.scanner.frame);state.scanner.frame=0;state.scanner.decoder=null;state.scanner.canvasCtx=null;state.scanner.lastDecode=0;if(state.scanner.stream){state.scanner.stream.getTracks().forEach(track=>track.stop());state.scanner.stream=null;}qa('[data-scanner-panel]').forEach(el=>el.hidden=true);qa('[data-scan-video]').forEach(video=>video.srcObject=null);state.scanner.mode='';}
+    function stopScanner(){stopScanGuide();state.scanner.generation++;state.scanner.cameraRequestId++;if(state.scanner.frame)cancelAnimationFrame(state.scanner.frame);state.scanner.frame=0;state.scanner.decoder=null;state.scanner.canvasCtx=null;state.scanner.lastDecode=0;if(state.scanner.stream){state.scanner.stream.getTracks().forEach(track=>track.stop());state.scanner.stream=null;}qa('[data-scanner-panel]').forEach(el=>el.hidden=true);qa('[data-scan-video]').forEach(video=>video.srcObject=null);state.scanner.mode='';}
 
     async function copyText(text){try{if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(text);else{const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.append(ta);ta.select();document.execCommand('copy');ta.remove();}notify(t('copied'));}catch{notify(t('copyFailed'),'warning');}}
     function updateStatusFromConnection(role){const pc=state[role].pc;if(!pc){setStatus(role,state[role].pendingOffer?t('prepareTitle'):t('stateNew'));return;}if(pc.connectionState==='connected')setStatus(role,t('connected'),'active');else if(pc.connectionState==='failed')setStatus(role,t('failed'),'warning');else if(pc.connectionState==='disconnected')setStatus(role,t('disconnected'),'warning');}
@@ -839,7 +890,7 @@
       else if(action==='host-stop-camera'||action==='join-stop-camera')stopScanner();else if(action==='disconnect'){closePc(state.role);state.connected=false;q(`[data-connected="${state.role}"]`).hidden=true;setStatus(state.role,t('closed'));emitState(state.role,'closed');}
     });
     root.addEventListener('input',event=>{if(event.target.matches('[data-host-answer-input]'))q('[data-action="host-apply-answer"]').disabled=!event.target.value.trim();});
-    root.addEventListener('change',event=>{if(event.target.matches('[data-camera-select]')){const role=event.target.dataset.cameraSelect;state.scanner.mode=role;void openCamera(role,event.target.value).catch(()=>notify(t('cameraFailed'),'warning'));}});
+    root.addEventListener('change',event=>{if(event.target.matches('[data-camera-select]')){const role=event.target.dataset.cameraSelect;state.scanner.mode=role;const generation=state.scanner.generation;void openCamera(role,event.target.value,generation).catch(()=>{if(state.scanner.generation===generation){notify(t('cameraFailed'),'warning');stopScanner();}});}});
     const onKeydown=event=>{if(event.key==='Escape'&&!q('[data-fullscreen]').hidden)q('[data-fullscreen]').hidden=true;};
     document.addEventListener('keydown',onKeydown);
 
