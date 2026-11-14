@@ -11,6 +11,8 @@ assert.match(app,/QRで接続します。<\/p>/);
 assert.doesNotMatch(app,/privacyBadge:|class="privacy-badge"|data-i18n="privacyBadge"/);
 assert.match(app,/state\.file=file;\$\('#introSection'\)\.hidden=true;\$\('#startView'\)\.hidden=true;/);
 assert.match(app,/state\.phase='error';\$\('#loadStatus'\)\.hidden=true;\$\('#introSection'\)\.hidden=false;/);
+assert.match(app,/@media\(max-width:1040px\)\{\.presenter\{grid-template-columns:130px minmax\(0,1fr\)\}\.side-column\{grid-column:1\/-1;position:static;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)\}/,'two cards fill the mid-width row');
+assert.doesNotMatch(app,/\.side-column\{grid-column:1\/-1;position:static;grid-template-columns:repeat\(3,/,'no empty third column after removal of the compatibility card');
 assert.match(app,/<div class="compat-inline"><details id="compatDetails" class="compat-details"><summary>/);
 assert.doesNotMatch(app,/compat-card/,'no compatibility card remains on mobile or desktop');
 assert.match(app,/\.compat-inline\{margin:8px 0 0;padding:2px 4px 0;min-width:0\}/,'unboxed compatibility row');
